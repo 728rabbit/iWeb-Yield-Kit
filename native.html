@@ -35,18 +35,33 @@
                 height: 40px;
             }
             
-            #demotable {
+            #demotable,
+            #demotable2 {
                 width: 100%;
             }
             
             #demotable th,
-            #demotable td {
+            #demotable td,
+            #demotable2 th,
+            #demotable2 td {
                 position: relative;
                 padding: 8px 4px;
                 border: 2px solid var(--icolor-gray);
                 text-align: left;
                 word-break: break-all;
                 overflow: hidden;
+            }
+            
+            #tinymce ul.iweb-flex > li {
+                border: 2px dotted var(--icolor-gray);
+            }
+            
+            #tinymce div.iweb-grid div.column,
+            #tinymce div.iweb-grid div.column-2,
+            #tinymce div.iweb-grid div.column-3,
+            #tinymce div.iweb-grid div.column-4,
+            #tinymce div.iweb-grid div.column-5 {
+                border: 2px dotted var(--icolor-gray);
             }
         </style>
     </head>
@@ -303,6 +318,13 @@
 
                         <div>
                             <div class="iweb-row">
+                                <label>1/1</label>
+                                <div class="iweb-grid">
+                                    <div class="column">Col</div>
+                                </div>
+                            </div>
+                            
+                            <div class="iweb-row">
                                 <label>1/2</label>
                                 <div class="iweb-grid">
                                     <div class="column-2">Col - 1</div>
@@ -369,6 +391,25 @@
                                     <th>Email</th>
                                 </tr>
                             </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Alice <span>(admin)</span></td>
+                                    <td>25</td>
+                                    <td>USA</td>
+                                    <td>alice@example.com</td>
+                                </tr>
+                                <tr>
+                                    <td>Bob</td>
+                                    <td>30</td>
+                                    <td>UK</td>
+                                    <td>bob@example.com</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <br/><br/>
+                        
+                        <table id="demotable2" class="iweb-rtable">
                             <tbody>
                                 <tr>
                                     <td>Alice <span>(admin)</span></td>
