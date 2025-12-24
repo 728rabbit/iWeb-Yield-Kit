@@ -136,19 +136,19 @@ table {
     max-width: 100%;
 }
 
-table.iweb-rtable th > div,
-table.iweb-rtable td > div {
+table.iweb-table th > div,
+table.iweb-table td > div {
     position: relative;
 }
 
-table.iweb-rtable.responsive tr {
+table.iweb-table.responsive tr {
     display: block;
     width: 100%;
     margin-bottom: 15px;
 }
 
-table.iweb-rtable.responsive th,
-table.iweb-rtable.responsive td {
+table.iweb-table.responsive th,
+table.iweb-table.responsive td {
    display: -webkit-box;
    display: -ms-flexbox;
    display: flex;
@@ -157,33 +157,33 @@ table.iweb-rtable.responsive td {
    padding: 0px!important;
 }
 
-table.iweb-rtable.responsive thead {
+table.iweb-table.responsive thead {
     display: none;
 }
 
-table.iweb-rtable.responsive tbody > tr > td:not(:first-child) {
+table.iweb-table.responsive tbody > tr > td:not(:first-child) {
     border-top-width: 0px!important;
 }
 
-table.iweb-rtable.responsive tbody > tr > td > div {
+table.iweb-table.responsive tbody > tr > td > div {
     padding: 8px;
     text-align: left;
 }
 
-table.iweb-rtable.responsive tbody > tr > td > div.vlabel {
+table.iweb-table.responsive tbody > tr > td > div.vlabel {
     width: 120px;
     font-weight: bold;
 }
 
-table.iweb-rtable.responsive tbody > tr > td > div:nth-child(2) {
+table.iweb-table.responsive tbody > tr > td > div:nth-child(2) {
     max-width: calc(100% - 130px);
 }
 
-table.iweb-rtable.responsive.non-head tbody > tr > td > div.vlabel {
+table.iweb-table.responsive.non-head tbody > tr > td > div.vlabel {
     display: none!important;
 }
 
-table.iweb-rtable.responsive tbody > tr > td > div:nth-child(2) {
+table.iweb-table.responsive.non-head tbody > tr > td > div:nth-child(2) {
     max-width: 100%!important;
 }
 

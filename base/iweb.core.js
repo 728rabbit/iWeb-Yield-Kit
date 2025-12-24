@@ -770,7 +770,7 @@ class iwebApp {
         }
         
         // init responsive table
-        const rtable = document.querySelectorAll('table.iweb-rtable');
+        const rtable = document.querySelectorAll('table.iweb-table');
         if(rtable.length > 0) {
             rtable.forEach(function(table) {
                 table.querySelectorAll('th, td').forEach(cell => {
@@ -1481,7 +1481,7 @@ class iwebApp {
     
     responsiveTable() {
         const thisInstance = this;
-        const rtable = document.querySelectorAll('table.iweb-rtable');
+        const rtable = document.querySelectorAll('table.iweb-table');
         if(rtable.length > 0) {
             rtable.forEach(function(table) {
                 const switch_width = (table.dataset.rw || 720);
