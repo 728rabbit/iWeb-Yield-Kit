@@ -5,7 +5,7 @@ Helps you easily build web applications with the most commonly used features alr
 
 In addition, efforts are being made to develop other tools (e.g. Simple Resource Calendar etc)
 
-Demo Link: https://728rabbit.github.io/iweb-yield-kit/
+Demo Link: https://728rabbit.github.io/iweb-yard-kit/
 
 Contact email: kaiyun-chan@hotmail.com
 
@@ -22,7 +22,7 @@ All rights reserved.
 
 此外，我們正在努力開發其他工具（例如：簡易資源日曆等）。
 
-示範連結：https://728rabbit.github.io/iweb-yield-kit/
+示範連結：https://728rabbit.github.io/iweb-yard-kit/
 
 聯絡信箱：kaiyun-chan@hotmail.com
 
@@ -33,6 +33,7 @@ All rights reserved.
 2. 修改、商業用途或散佈修改後的版本均需事先獲得作者的書面許可。
 
 版權所有。
+
 
 
 
