@@ -433,7 +433,7 @@ a.btn {
     -webkit-user-select: none;
     -ms-user-select: none;
     -moz-user-select: none;
-         user-select: none; 
+         user-select: none;
 }
 
 button.btn.full {

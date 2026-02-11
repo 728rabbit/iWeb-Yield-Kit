@@ -3626,8 +3626,8 @@ class iwebyKit {
         const yearText = (startYear === currentYear) ? `${currentYear}` : `${startYear}–${currentYear}`;
         const author = 'KaiyunChan';
         const text = [
-            'iWeb Yield Kit - easily build web applications with the most commonly used features already included.',
-            'Copyright: ' + yearText+ ' ' + author,
+            'iWeby Kit - to easily build web applications with the most commonly used features already included.',
+            'Copyright © ' + yearText+ ' ' + author,
             'License: Personal/educational use only. Modifications and commercial use require permission.',
         ];
         console.log(`%c${text.join('\n')}`, 'color: #525896; font-weight: bold;');
