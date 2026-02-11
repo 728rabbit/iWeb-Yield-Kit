@@ -94,7 +94,7 @@ class iwebyKit {
             };
 
             const MODES = ['desktop', 'tablet', 'mobile'];
-            const viewer = document.querySelector('div.iweb-viewer');
+            const viewer = document.querySelector('div.iweby-viewer');
             if(viewer) {
                 MODES.forEach(mode => viewer.classList.remove(mode));
 
@@ -128,16 +128,16 @@ class iwebyKit {
             const csrfTokenContent = metaToken ? metaToken.content : '';
             if (thisInstance.isValue(csrfTokenContent)) {
                 const hostname = (location.hostname || '/');
-                thisInstance.csrfToken = thisInstance.md5.hash(thisInstance.md5.hash('iweb@' + hostname) + '@' + csrfTokenContent);
+                thisInstance.csrfToken = thisInstance.md5.hash(thisInstance.md5.hash('iweby@' + hostname) + '@' + csrfTokenContent);
             }
 
             // Init body & component
             thisInstance.initBody();
             thisInstance.initComponent();
             
-            // Set iweb-viewer width
-            if(document.querySelector('div.iweb-viewer')) {
-                thisInstance.viewerWidth = parseInt(document.querySelector('div.iweb-viewer').offsetWidth);
+            // Set iweby-viewer width
+            if(document.querySelector('div.iweby-viewer')) {
+                thisInstance.viewerWidth = parseInt(document.querySelector('div.iweby-viewer').offsetWidth);
             }
 
             // Call function
@@ -150,15 +150,15 @@ class iwebyKit {
                 thisInstance.responsive();
                 thisInstance.responsiveTable();
                 
-                safeCallFunc('iwebCommonLayout', thisInstance.viewerWidth);
-                safeCallFunc('iwebLayout', thisInstance.viewerWidth);
-                safeCallFunc('iwebChildLayout', thisInstance.viewerWidth);
-                safeCallFunc('iwebExtraLayout', thisInstance.viewerWidth);
+                safeCallFunc('iwebyCommonLayout', thisInstance.viewerWidth);
+                safeCallFunc('iwebyLayout', thisInstance.viewerWidth);
+                safeCallFunc('iwebyChildLayout', thisInstance.viewerWidth);
+                safeCallFunc('iwebyExtraLayout', thisInstance.viewerWidth);
 
-                safeCallFunc('iwebCommonFunc');
-                safeCallFunc('iwebFunc');
-                safeCallFunc('iwebChildFunc');
-                safeCallFunc('iwebExtraFunc');
+                safeCallFunc('iwebyCommonFunc');
+                safeCallFunc('iwebyFunc');
+                safeCallFunc('iwebyChildFunc');
+                safeCallFunc('iwebyExtraFunc');
                 
                 thisInstance.copyright();
             }, 100);
@@ -168,15 +168,15 @@ class iwebyKit {
         window.onload = function() {
             setTimeout(function() {
                 //console.log('window done');
-                safeCallFunc('iwebCommonLayoutEnd', thisInstance.viewerWidth);
-                safeCallFunc('iwebLayoutEnd', thisInstance.viewerWidth);
-                safeCallFunc('iwebChildLayoutEnd', thisInstance.viewerWidth);
-                safeCallFunc('iwebExtraLayoutEnd', thisInstance.viewerWidth);
+                safeCallFunc('iwebyCommonLayoutEnd', thisInstance.viewerWidth);
+                safeCallFunc('iwebyLayoutEnd', thisInstance.viewerWidth);
+                safeCallFunc('iwebyChildLayoutEnd', thisInstance.viewerWidth);
+                safeCallFunc('iwebyExtraLayoutEnd', thisInstance.viewerWidth);
 
-                safeCallFunc('iwebCommonFuncEnd');
-                safeCallFunc('iwebFuncEnd');
-                safeCallFunc('iwebChildEnd');
-                safeCallFunc('iwebExtraEnd');
+                safeCallFunc('iwebyCommonFuncEnd');
+                safeCallFunc('iwebyFuncEnd');
+                safeCallFunc('iwebyChildEnd');
+                safeCallFunc('iwebyExtraEnd');
             }, 100);
         };
 
@@ -185,18 +185,18 @@ class iwebyKit {
             clearTimeout(thisInstance.timer);
             thisInstance.timer = setTimeout(() => {
                 //console.log('window resize');
-                if (thisInstance.viewerWidth !== parseInt(document.querySelector('div.iweb-viewer').offsetWidth)) {
-                    thisInstance.viewerWidth = parseInt(document.querySelector('div.iweb-viewer').offsetWidth);
+                if (thisInstance.viewerWidth !== parseInt(document.querySelector('div.iweby-viewer').offsetWidth)) {
+                    thisInstance.viewerWidth = parseInt(document.querySelector('div.iweby-viewer').offsetWidth);
 
                     setViewMode(thisInstance.viewerWidth);
                     
                     thisInstance.responsive();
                     thisInstance.responsiveTable();
                     
-                    safeCallFunc('iwebCommonLayout', thisInstance.viewerWidth);
-                    safeCallFunc('iwebLayout', thisInstance.viewerWidth);
-                    safeCallFunc('iwebChildLayout', thisInstance.viewerWidth);
-                    safeCallFunc('iwebExtraLayout', thisInstance.viewerWidth);
+                    safeCallFunc('iwebyCommonLayout', thisInstance.viewerWidth);
+                    safeCallFunc('iwebyLayout', thisInstance.viewerWidth);
+                    safeCallFunc('iwebyChildLayout', thisInstance.viewerWidth);
+                    safeCallFunc('iwebyExtraLayout', thisInstance.viewerWidth);
                 }
             }, 100);
         });
@@ -206,10 +206,10 @@ class iwebyKit {
             clearTimeout(thisInstance.scrollTimer);
             thisInstance.scrollTimer = setTimeout(() => {
                 //console.log('window scroll');
-                safeCallFunc('iwebCommonScroll', window.scrollY);
-                safeCallFunc('iwebScroll', window.scrollY);
-                safeCallFunc('iwebChildScroll', window.scrollY);
-                safeCallFunc('iwebExtraScroll', window.scrollY);
+                safeCallFunc('iwebyCommonScroll', window.scrollY);
+                safeCallFunc('iwebyScroll', window.scrollY);
+                safeCallFunc('iwebyChildScroll', window.scrollY);
+                safeCallFunc('iwebyExtraScroll', window.scrollY);
             }, 100);
         });
         
@@ -220,11 +220,11 @@ class iwebyKit {
         const thisInstance = this;
 
         // Add core class to body
-        document.body.classList.add('iweb');
+        document.body.classList.add('iweby');
 
         // Wrap elements except for <script>, <noscript>, and <style>
         const wrapper = document.createElement('div');
-        wrapper.classList.add('iweb-viewer');
+        wrapper.classList.add('iweby-viewer');
         const bodyChildren = Array.from(document.body.childNodes);
         bodyChildren.forEach(function(node) {
             if (node.nodeType === Node.ELEMENT_NODE) {
@@ -251,17 +251,17 @@ class iwebyKit {
                     e.preventDefault();
                     
                     // Hide tips message
-                    if (target.closest('div.iweb-tips-message')) {
-                        target.closest('div.iweb-tips-message').classList.remove('error');
-                        target.closest('div.iweb-tips-message').classList.remove('success');
-                        target.closest('div.iweb-tips-message').innerHTML = '';
+                    if (target.closest('div.iweby-tips-message')) {
+                        target.closest('div.iweby-tips-message').classList.remove('error');
+                        target.closest('div.iweby-tips-message').classList.remove('success');
+                        target.closest('div.iweby-tips-message').innerHTML = '';
                     } 
                     
                     // Reset autocomplete's input
                     else if (target.closest('a.fill-reset')) {
-                        const fillID = target.closest('div.iweb-input-autocomplete').querySelector('input.fill-id');
-                        const fillText = target.closest('div.iweb-input-autocomplete').querySelector('input.fill-text');
-                        const fillReset = target.closest('div.iweb-input-autocomplete').querySelector('a.fill-reset');
+                        const fillID = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-id');
+                        const fillText = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-text');
+                        const fillReset = target.closest('div.iweby-input-autocomplete').querySelector('a.fill-reset');
                         fillID.value = '';
                         fillText.value = '';
                         fillText.readOnly = false;
@@ -301,9 +301,9 @@ class iwebyKit {
 
             // Switch password input display mode
             if (target.closest('button.switch-pwd-type')) {
-                const InputPwd = target.closest('div.iweb-input').querySelector('input');
-                const ShowIconPwd = target.closest('div.iweb-input').querySelector('i.show');
-                const HideIconPwd = target.closest('div.iweb-input').querySelector('i.hide');
+                const InputPwd = target.closest('div.iweby-input').querySelector('input');
+                const ShowIconPwd = target.closest('div.iweby-input').querySelector('i.show');
+                const HideIconPwd = target.closest('div.iweby-input').querySelector('i.hide');
                 if (thisInstance.isMatch(InputPwd.type, 'password')) {
                     InputPwd.type = 'text';
                     ShowIconPwd.style.display = 'block';
@@ -317,31 +317,31 @@ class iwebyKit {
             }
 
             // Hide autocomplete options
-            if (!target.closest('div.iweb-input-autocomplete')) {
-                document.querySelectorAll('div.iweb-input-autocomplete ul.fill-options').forEach(function(e1) {
+            if (!target.closest('div.iweby-input-autocomplete')) {
+                document.querySelectorAll('div.iweby-input-autocomplete ul.fill-options').forEach(function(e1) {
                     e1.remove();
                 });
             }
 
             // Show or hide select options
-            if (!target.closest('div.iweb-select')) {
-                document.querySelectorAll('div.iweb-select').forEach(function(e1) {
+            if (!target.closest('div.iweby-select')) {
+                document.querySelectorAll('div.iweby-select').forEach(function(e1) {
                     e1.classList.remove('show');
                 });
             } 
             else {
-                const virtualOptions = target.closest('div.iweb-select').querySelector('div.virtual > div.options > ul');
+                const virtualOptions = target.closest('div.iweby-select').querySelector('div.virtual > div.options > ul');
                 if (thisInstance.isValue(virtualOptions)) {
                     if (target.closest('a.result')) {
-                        if (target.closest('div.iweb-select').classList.contains('show')) {
-                            target.closest('div.iweb-select').classList.remove('show');
+                        if (target.closest('div.iweby-select').classList.contains('show')) {
+                            target.closest('div.iweby-select').classList.remove('show');
                         } 
                         else {
-                            target.closest('div.iweb-select').classList.add('show');
+                            target.closest('div.iweby-select').classList.add('show');
                         }
                     }
                     
-                    document.querySelectorAll('div.iweb-select').forEach(function(otherSelector) {
+                    document.querySelectorAll('div.iweby-select').forEach(function(otherSelector) {
                         const otherOptions = otherSelector.querySelector('div.virtual > div.options > ul');
                         if (otherOptions) {
                             if (!thisInstance.isMatch(otherOptions.getAttribute('data-index'), virtualOptions.getAttribute('data-index'))) {
@@ -351,8 +351,8 @@ class iwebyKit {
                     });
 
                     if (target.closest('a') && target.closest('li.node')) {
-                        const isMultiple = target.closest('div.iweb-select').classList.contains('iweb-select-multiple');
-                        const selectElement = target.closest('div.iweb-select').querySelector('div.real > select');
+                        const isMultiple = target.closest('div.iweby-select').classList.contains('iweby-select-multiple');
+                        const selectElement = target.closest('div.iweby-select').querySelector('div.real > select');
                         let selectedOptions = [];
                         
                         // Handle multiple selection
@@ -397,7 +397,7 @@ class iwebyKit {
                         
                         // Handle single selection
                         else {
-                            target.closest('div.iweb-select').classList.remove('show');
+                            target.closest('div.iweby-select').classList.remove('show');
                             selectElement.value = (target.getAttribute('data-value') || '');
                             selectElement.dispatchEvent(new Event('change', {
                                 bubbles: true
@@ -406,7 +406,7 @@ class iwebyKit {
                     }
                 } 
                 else {
-                    document.querySelectorAll('div.iweb-select').forEach(function(otherSelect) {
+                    document.querySelectorAll('div.iweby-select').forEach(function(otherSelect) {
                         otherSelect.classList.remove('show');
                     });
                 }
@@ -416,24 +416,24 @@ class iwebyKit {
         // Handle input
         document.addEventListener('input', function(e) {
             const target = e.target;
-            if (target.closest('div.iweb-input')) {
-                target.closest('div.iweb-input').classList.remove('error');
-                const oriSmallTips = target.closest('div.iweb-input').querySelector('small.tips');
+            if (target.closest('div.iweby-input')) {
+                target.closest('div.iweby-input').classList.remove('error');
+                const oriSmallTips = target.closest('div.iweby-input').querySelector('small.tips');
                 if (oriSmallTips) {
                     oriSmallTips.remove();
                 }
             }
 
             // Color code
-            if (target.closest('div.iweb-input-color')) {
+            if (target.closest('div.iweby-input-color')) {
                 if (thisInstance.isMatch(target.type, 'color')) {
-                    const inputColorCode = target.closest('div.iweb-input-color').querySelector('input[type="text"]');
+                    const inputColorCode = target.closest('div.iweby-input-color').querySelector('input[type="text"]');
                     if (/^#[0-9A-F]{6}$/i.test(target.value)) {
                         inputColorCode.value = target.value;
                     }
                 } 
                 else {
-                    const input = target.closest('div.iweb-input-color').querySelector('input[type="color"]');
+                    const input = target.closest('div.iweby-input-color').querySelector('input[type="color"]');
                     if (!target.value.startsWith('#')) {
                         target.value = '#' + target.value;
                     }
@@ -444,16 +444,16 @@ class iwebyKit {
             }
             
             // Autocomplete
-            else if (target.closest('div.iweb-input-autocomplete') && target.closest('input.fill-text')) {
+            else if (target.closest('div.iweby-input-autocomplete') && target.closest('input.fill-text')) {
                 clearTimeout(thisInstance.timer);
                 thisInstance.timer = setTimeout(() => {
                     // Remove error, tips & options list
-                    target.closest('div.iweb-input-autocomplete').classList.remove('error');
-                    const oriSmallTips = target.closest('div.iweb-input-autocomplete').querySelector('small.tips');
+                    target.closest('div.iweby-input-autocomplete').classList.remove('error');
+                    const oriSmallTips = target.closest('div.iweby-input-autocomplete').querySelector('small.tips');
                     if (oriSmallTips) {
                         oriSmallTips.remove();
                     }
-                    const oriFillOptions = target.closest('div.iweb-input-autocomplete').querySelector('ul.fill-options');
+                    const oriFillOptions = target.closest('div.iweby-input-autocomplete').querySelector('ul.fill-options');
                     if(oriFillOptions) {
                         oriFillOptions.remove();
                     }
@@ -461,7 +461,7 @@ class iwebyKit {
                     // Gather extra parameters
                     let extraPayload = {};
                     for (let i = 1; i <= 5; i++) {
-                        let param = target.closest('div.iweb-input-autocomplete').querySelector('input.fill-id').getAttribute('data-param' + i);
+                        let param = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-id').getAttribute('data-param' + i);
                         if (thisInstance.isValue(param)) {
                             let [key, value] = param.split(':');
                             extraPayload[key] = value;
@@ -470,7 +470,7 @@ class iwebyKit {
 
                     // Merge post data
                     const keywords = target.value;
-                    const url = target.closest('div.iweb-input-autocomplete').querySelector('input.fill-id').getAttribute('data-url');
+                    const url = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-id').getAttribute('data-url');
                     const requestData = {
                         url: url,
                         payload: Object.assign({
@@ -496,14 +496,14 @@ class iwebyKit {
                                     a.textContent = value.name;
                                     a.addEventListener('click', thisInstance.deBounce(function(e1) {
                                         const target = e1.target;
-                                        const orifillReset = target.closest('div.iweb-input-autocomplete').querySelector('a.fill-reset');
+                                        const orifillReset = target.closest('div.iweby-input-autocomplete').querySelector('a.fill-reset');
                                         if(orifillReset) {
                                             orifillReset.remove();
                                         }
 
                                         // Set id input & search input
-                                        const fillID = target.closest('div.iweb-input-autocomplete').querySelector('input.fill-id');
-                                        const fillText = target.closest('div.iweb-input-autocomplete').querySelector('input.fill-text');
+                                        const fillID = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-id');
+                                        const fillText = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-text');
                                         fillID.value = (target.getAttribute('data-id') || '');
                                         fillText.value = (target.getAttribute('data-value') || '');
                                         fillText.readOnly = true;
@@ -519,15 +519,15 @@ class iwebyKit {
 
                                         // Append elements
                                         fillReset.appendChild(fillResetIcon);
-                                        fillID.closest('div.iweb-input-autocomplete').appendChild(fillReset);
+                                        fillID.closest('div.iweby-input-autocomplete').appendChild(fillReset);
 
                                         // Remove error, tips & options list
-                                        fillID.closest('div.iweb-input-autocomplete').classList.remove('error');
-                                        const oriSmallTips = fillID.closest('div.iweb-input-autocomplete').querySelector('small.tips');
+                                        fillID.closest('div.iweby-input-autocomplete').classList.remove('error');
+                                        const oriSmallTips = fillID.closest('div.iweby-input-autocomplete').querySelector('small.tips');
                                         if(oriSmallTips) {
                                             oriSmallTips.remove();
                                         }
-                                        const oriFillOptions = fillID.closest('div.iweb-input-autocomplete').querySelector('ul.fill-options');
+                                        const oriFillOptions = fillID.closest('div.iweby-input-autocomplete').querySelector('ul.fill-options');
                                         if(oriFillOptions) {
                                             oriFillOptions.remove();
                                         }
@@ -545,7 +545,7 @@ class iwebyKit {
                                 });
 
                                 // Append elements
-                                target.closest('div.iweb-input-autocomplete').appendChild(fillOptions);
+                                target.closest('div.iweby-input-autocomplete').appendChild(fillOptions);
                             } 
                             else {
                                 const fillOptions = document.createElement('ul');
@@ -556,7 +556,7 @@ class iwebyKit {
                                 fillOptions.appendChild(li);
 
                                 // Append elements
-                                target.closest('div.iweb-input-autocomplete').appendChild(fillOptions);
+                                target.closest('div.iweby-input-autocomplete').appendChild(fillOptions);
                             }
                         });
                     }
@@ -564,12 +564,12 @@ class iwebyKit {
             } 
             
             // Select search options
-            else if (target.closest('div.iweb-select') && target.closest('li.filter')) {
+            else if (target.closest('div.iweby-select') && target.closest('li.filter')) {
                 const fkw = target.value;
                 
                 // Find all node elements
                 if (thisInstance.isValue(fkw)) {
-                    target.closest('div.iweb-select').querySelectorAll('div.virtual > div.options ul > li.node > a').forEach(function(anchor) {
+                    target.closest('div.iweby-select').querySelectorAll('div.virtual > div.options ul > li.node > a').forEach(function(anchor) {
                         const textContent = anchor.textContent || anchor.innerText;
                         if (textContent.toLowerCase().indexOf(fkw.toLowerCase()) > -1) {
                             anchor.parentElement.classList.remove('hide');
@@ -586,7 +586,7 @@ class iwebyKit {
                 
                 // If filter is empty, remove 'hide' class from all node elements
                 else {
-                    target.closest('div.iweb-select').querySelectorAll('div.virtual > div.options ul > li.node').forEach(function(nodeElement) {
+                    target.closest('div.iweby-select').querySelectorAll('div.virtual > div.options ul > li.node').forEach(function(nodeElement) {
                         nodeElement.classList.remove('hide');
                     });
                 }
@@ -598,13 +598,13 @@ class iwebyKit {
             const target = e.target;
                 
             // Select
-            if (target.closest('div.iweb-select')) {
+            if (target.closest('div.iweby-select')) {
                 let selectedOptions = [];
                 let selectedOptionLabel = '';
 
                 // Remove error & tips
-                target.closest('div.iweb-select').classList.remove('error');
-                const oriSmallTips = target.closest('div.iweb-select').querySelector('small.tips');
+                target.closest('div.iweby-select').classList.remove('error');
+                const oriSmallTips = target.closest('div.iweby-select').querySelector('small.tips');
                 if(oriSmallTips) {
                     oriSmallTips.remove();
                 } 
@@ -626,8 +626,8 @@ class iwebyKit {
                 });
 
                 // Find and update the corresponding virtual options
-                if (target.closest('div.iweb-select').querySelectorAll('div.virtual > div.options ul > li > a').length > 0) {
-                    target.closest('div.iweb-select').querySelectorAll('div.virtual > div.options ul > li > a').forEach(function(anchor) {
+                if (target.closest('div.iweby-select').querySelectorAll('div.virtual > div.options ul > li > a').length > 0) {
+                    target.closest('div.iweby-select').querySelectorAll('div.virtual > div.options ul > li > a').forEach(function(anchor) {
                         const optionValue = anchor.getAttribute('data-value');
                         if (thisInstance.isValue(optionValue)) {
                             if (!thisInstance.isMatch(selectedOptions.indexOf(optionValue), -1)) {
@@ -649,13 +649,13 @@ class iwebyKit {
                     }
 
                     // Update the virtual result label
-                    target.closest('div.iweb-select').querySelector('div.virtual > a.result').innerHTML = selectedOptionLabel;
+                    target.closest('div.iweby-select').querySelector('div.virtual > a.result').innerHTML = selectedOptionLabel;
                 }
             } 
             
             // File
-            else if (target.closest('div.iweb-input-file') && !target.closest('div.iweb-files-dropzone')) {
-                const filePreviewArea = target.closest('div.iweb-input-file').querySelector('div.preview');
+            else if (target.closest('div.iweby-input-file') && !target.closest('div.iweby-files-dropzone')) {
+                const filePreviewArea = target.closest('div.iweby-input-file').querySelector('div.preview');
                 if(filePreviewArea) {
                     filePreviewArea.remove();
                 }
@@ -674,7 +674,7 @@ class iwebyKit {
                         
                         deleteBtn.addEventListener('click', function(e){
                             const btnTarget = e.target;
-                            const inputTarget = btnTarget.closest('div.iweb-input-file').querySelector('input[type="file"]');
+                            const inputTarget = btnTarget.closest('div.iweby-input-file').querySelector('input[type="file"]');
 
                             selectedFiles.splice(target.getAttribute('data-index'), 1);
                             btnTarget.closest('div').remove();
@@ -692,24 +692,24 @@ class iwebyKit {
                         previewArea.appendChild(blockdiv);
                     });
                     
-                    target.closest('div.iweb-input-file').appendChild(previewArea);
+                    target.closest('div.iweby-input-file').appendChild(previewArea);
                 }
             }
             
             // Checkbox
-            else if (target.closest('div.iweb-checkbox')) {
+            else if (target.closest('div.iweby-checkbox')) {
                 const relatedObject = document.querySelectorAll('input[type="checkbox"][name="' + (target.name) + '"]');
                 relatedObject.forEach(function(relatedCheckbox) {
-                    relatedCheckbox.closest('div.iweb-checkbox').classList.remove('checked');
+                    relatedCheckbox.closest('div.iweby-checkbox').classList.remove('checked');
                     if (relatedCheckbox.checked) {
-                        relatedCheckbox.closest('div.iweb-checkbox').classList.add('checked');
+                        relatedCheckbox.closest('div.iweby-checkbox').classList.add('checked');
                     }
-                    relatedCheckbox.closest('div.iweb-checkbox').classList.remove('error');
+                    relatedCheckbox.closest('div.iweby-checkbox').classList.remove('error');
                 });
 
                 // Remove tips
-                if (target.closest('div.iweb-checkbox-set')) {
-                    const oriSmallTips = target.closest('div.iweb-checkbox-set').querySelector('small.tips');
+                if (target.closest('div.iweby-checkbox-set')) {
+                    const oriSmallTips = target.closest('div.iweby-checkbox-set').querySelector('small.tips');
                     if(oriSmallTips) {
                         oriSmallTips.remove();
                     }
@@ -717,24 +717,24 @@ class iwebyKit {
             } 
             
             // Radio
-            else if (target.closest('div.iweb-radio')) {
+            else if (target.closest('div.iweby-radio')) {
                 const selectedValue = target.value;
                 const relatedObject = document.querySelectorAll('input[type="radio"][name="' + (target.name) + '"]');
                 relatedObject.forEach(function(relatedRadio) {
                     if (thisInstance.isMatch(relatedRadio.value, selectedValue)) {
                         relatedRadio.checked = true;
-                        relatedRadio.closest('div.iweb-radio').classList.add('checked');
+                        relatedRadio.closest('div.iweby-radio').classList.add('checked');
                     }
                     else {
                         relatedRadio.checked = false;
-                        relatedRadio.closest('div.iweb-radio').classList.remove('checked');
+                        relatedRadio.closest('div.iweby-radio').classList.remove('checked');
                     }
-                    relatedRadio.closest('div.iweb-radio').classList.remove('error');
+                    relatedRadio.closest('div.iweby-radio').classList.remove('error');
                 });
 
                 // Remove tips
-                if (target.closest('div.iweb-radio-set')) {
-                    const oriSmallTips = target.closest('div.iweb-radio-set').querySelector('small.tips');
+                if (target.closest('div.iweby-radio-set')) {
+                    const oriSmallTips = target.closest('div.iweby-radio-set').querySelector('small.tips');
                     if(oriSmallTips) {
                         oriSmallTips.remove();
                     }
@@ -770,7 +770,7 @@ class iwebyKit {
         }, 500);
         
         // set flex gap
-        const uls = document.querySelectorAll('ul.iweb-flex');
+        const uls = document.querySelectorAll('ul.iweby-flex');
         if(uls.length > 0) {
             uls.forEach(ul => {
                 const gap = ul.dataset.gap;
@@ -785,7 +785,7 @@ class iwebyKit {
         }
 
         // insert div before & after into editor div
-        const editors = document.querySelectorAll('div.iweb-editor');
+        const editors = document.querySelectorAll('div.iweby-editor');
         if(editors.length > 0) {
             editors.forEach(editor => {
                 if (!editor.classList.contains('inited')) {
@@ -803,7 +803,7 @@ class iwebyKit {
         }
         
         // init responsive table
-        const rtable = document.querySelectorAll('table.iweb-table');
+        const rtable = document.querySelectorAll('table.iweby-table');
         if(rtable.length > 0) {
             rtable.forEach(function(table) {
                 table.querySelectorAll('th, td').forEach(cell => {
@@ -843,13 +843,13 @@ class iwebyKit {
 
         if (inputObject.length > 0) {
             inputObject.forEach(function(input) {
-                if (!input.closest('div.iweb-input')) {
+                if (!input.closest('div.iweby-input')) {
                     // Create div and move the input into it
                     const inputType = input.type;
                     const isAutocomplete = (thisInstance.isMatch(input.getAttribute('data-autocomplete'), 1) || thisInstance.isMatch(input.getAttribute('data-autocomplete'), true));
                     const wrapperDiv = document.createElement('div');
-                    wrapperDiv.classList.add('iweb-input');
-                    wrapperDiv.classList.add((isAutocomplete ? 'iweb-input-autocomplete' : 'iweb-input-' + (thisInstance.isValue(input.type) ? input.type : 'text')));
+                    wrapperDiv.classList.add('iweby-input');
+                    wrapperDiv.classList.add((isAutocomplete ? 'iweby-input-autocomplete' : 'iweby-input-' + (thisInstance.isValue(input.type) ? input.type : 'text')));
                     input.parentNode.insertBefore(wrapperDiv, input);
                     wrapperDiv.appendChild(input);
 
@@ -980,7 +980,7 @@ class iwebyKit {
 
         if (selectObject.length > 0) {
             selectObject.forEach(function(select, selectIndex) {
-                if (!select.closest('div.iweb-select')) {
+                if (!select.closest('div.iweby-select')) {
                     // Get config
                     const isMultiple = ((thisInstance.isMatch(select.multiple, 1) || thisInstance.isMatch(select.multiple, true)) ? true : false);
                     const isVirtual = ((thisInstance.isMatch(select.getAttribute('data-virtual'), 1) || thisInstance.isMatch(select.getAttribute('data-virtual'), true)) ? true : false);
@@ -990,9 +990,9 @@ class iwebyKit {
                     if (isVirtual) {
                         // Create div & move the select into div
                         const wrapperDiv = document.createElement('div');
-                        wrapperDiv.classList.add('iweb-select');
+                        wrapperDiv.classList.add('iweby-select');
                         if (isMultiple) {
-                            wrapperDiv.classList.add('iweb-select-multiple');
+                            wrapperDiv.classList.add('iweby-select-multiple');
                         };
 
                         const realDiv = document.createElement('div');
@@ -1110,7 +1110,7 @@ class iwebyKit {
                     else {
                         // Create div & move the select into the div
                         const wrapperDiv = document.createElement('div');
-                        wrapperDiv.classList.add('iweb-select');
+                        wrapperDiv.classList.add('iweby-select');
                         const realDiv = document.createElement('div');
                         realDiv.classList.add('real');
 
@@ -1144,12 +1144,12 @@ class iwebyKit {
 
         if (checkboxObject.length > 0) {
             checkboxObject.forEach(function(checkbox) {
-                if (!checkbox.closest('div.iweb-checkbox')) {
+                if (!checkbox.closest('div.iweby-checkbox')) {
                     const findCheckboxLabel = checkbox.nextElementSibling;
 
                     // Create div
                     const wrapperDiv = document.createElement('div');
-                    wrapperDiv.classList.add('iweb-checkbox');
+                    wrapperDiv.classList.add('iweby-checkbox');
                     if (checkbox.checked) {
                         wrapperDiv.classList.add('checked');
                     }
@@ -1213,12 +1213,12 @@ class iwebyKit {
 
         if (radioObject.length > 0) {
             radioObject.forEach(function(radio) {
-                if (!radio.closest('div.iweb-radio')) {
+                if (!radio.closest('div.iweby-radio')) {
                     const findRadioLabel = radio.nextElementSibling;
 
                     // Create div
                     const wrapperDiv = document.createElement('div');
-                    wrapperDiv.classList.add('iweb-radio');
+                    wrapperDiv.classList.add('iweby-radio');
                     if (radio.checked) {
                         wrapperDiv.classList.add('checked');
                     }
@@ -1272,7 +1272,7 @@ class iwebyKit {
         }
     }
 
-    iframe(element = 'div.iweb-editor', callBack) {
+    iframe(element = 'div.iweby-editor', callBack) {
         const thisInstance = this;
 
         if (thisInstance.isValue(element)) {
@@ -1281,11 +1281,11 @@ class iwebyKit {
             ['iframe', 'video', 'object', 'embed'].forEach(function(value) {
                 elements = document.querySelectorAll(element + ' ' + value);
                 elements.forEach(function(e) {
-                    // Check if the parent does not have the class 'iweb-responsive'
-                    if (!e.closest('div.iweb-responsive')) {
-                        // Wrap the element in a div with 'iweb-responsive' class
+                    // Check if the parent does not have the class 'iweby-responsive'
+                    if (!e.closest('div.iweby-responsive')) {
+                        // Wrap the element in a div with 'iweby-responsive' class
                         const wrapper = document.createElement('div');
-                        wrapper.className = 'iweb-responsive';
+                        wrapper.className = 'iweby-responsive';
                         wrapper.setAttribute('data-width', e.offsetWidth);
                         wrapper.setAttribute('data-height', e.offsetHeight);
 
@@ -1305,14 +1305,14 @@ class iwebyKit {
     video(callBack) {
         const thisInstance = this;
         
-        const elements = document.querySelectorAll('video.iweb-video');
+        const elements = document.querySelectorAll('video.iweby-video');
         elements.forEach(async function(e) {
-            if (!e.closest('div.iweb-video')) {
+            if (!e.closest('div.iweby-video')) {
                 e.removeAttribute('controls');
                 
-                const included_rdiv = (thisInstance.isValue(e.closest('div.iweb-responsive')));
+                const included_rdiv = (thisInstance.isValue(e.closest('div.iweby-responsive')));
                 const wrapper = document.createElement('div');
-                wrapper.className = 'iweb-video iweb-responsive';
+                wrapper.className = 'iweby-video iweby-responsive';
                 wrapper.setAttribute('data-width', (e.getAttribute('width') || e.offsetWidth));
                 wrapper.setAttribute('data-height', (e.getAttribute('height') || e.offsetHeight));
 
@@ -1331,8 +1331,8 @@ class iwebyKit {
                                     width = 300;
                                     height = 250;
                                 }
-                                v.target.closest('div.iweb-video').setAttribute('data-width', width);
-                                v.target.closest('div.iweb-video').setAttribute('data-height', height);
+                                v.target.closest('div.iweby-video').setAttribute('data-width', width);
+                                v.target.closest('div.iweby-video').setAttribute('data-height', height);
                                 thisInstance.responsive();
                             }, 500);
                         });
@@ -1346,14 +1346,14 @@ class iwebyKit {
                     v.preventDefault();
                 });
                 e.addEventListener('loadedmetadata', (v) => {
-                    v.target.closest('div.iweb-video').querySelector('span.v-duration').textContent = thisInstance.formatTime(0) + ' / ' + thisInstance.formatTime(e.duration);
+                    v.target.closest('div.iweby-video').querySelector('span.v-duration').textContent = thisInstance.formatTime(0) + ' / ' + thisInstance.formatTime(e.duration);
                 });
                 e.addEventListener('timeupdate', (v) => {
                     if(e.duration > 0) {
-                        v.target.closest('div.iweb-video').querySelector('span.v-duration').textContent = thisInstance.formatTime(e.currentTime) + ' / ' + thisInstance.formatTime(e.duration);
-                        v.target.closest('div.iweb-video').querySelector('input.v-progress-bar').value = (e.currentTime / e.duration) * 100;
+                        v.target.closest('div.iweby-video').querySelector('span.v-duration').textContent = thisInstance.formatTime(e.currentTime) + ' / ' + thisInstance.formatTime(e.duration);
+                        v.target.closest('div.iweby-video').querySelector('input.v-progress-bar').value = (e.currentTime / e.duration) * 100;
                         if(parseInt(e.currentTime) >= parseInt(e.duration)) {
-                            v.target.closest('div.iweb-video').querySelector('button.v-play-btn').innerHTML = '<svg viewBox="0 0 20 20" fill="#ffffff" stroke="#ffffff"><path d="M2.067,0.043C2.21-0.028,2.372-0.008,2.493,0.085l13.312,8.503c0.094,0.078,0.154,0.191,0.154,0.313 c0,0.12-0.061,0.237-0.154,0.314L2.492,17.717c-0.07,0.057-0.162,0.087-0.25,0.087l-0.176-0.04 c-0.136-0.065-0.222-0.207-0.222-0.361V0.402C1.844,0.25,1.93,0.107,2.067,0.043z"></path></svg>';
+                            v.target.closest('div.iweby-video').querySelector('button.v-play-btn').innerHTML = '<svg viewBox="0 0 20 20" fill="#ffffff" stroke="#ffffff"><path d="M2.067,0.043C2.21-0.028,2.372-0.008,2.493,0.085l13.312,8.503c0.094,0.078,0.154,0.191,0.154,0.313 c0,0.12-0.061,0.237-0.154,0.314L2.492,17.717c-0.07,0.057-0.162,0.087-0.25,0.087l-0.176-0.04 c-0.136-0.065-0.222-0.207-0.222-0.361V0.402C1.844,0.25,1.93,0.107,2.067,0.043z"></path></svg>';
                         }
                     }
                 });
@@ -1363,7 +1363,7 @@ class iwebyKit {
                     wrapper.appendChild(e);
                 }
                 else {
-                    e.closest('div.iweb-responsive').classList.add('iweb-video');
+                    e.closest('div.iweby-responsive').classList.add('iweby-video');
                 } 
 
                 const controls = document.createElement('div');
@@ -1376,15 +1376,15 @@ class iwebyKit {
                 playBtn.innerHTML = '<svg viewBox="0 0 20 20" fill="#ffffff" stroke="#ffffff"><path d="M2.067,0.043C2.21-0.028,2.372-0.008,2.493,0.085l13.312,8.503c0.094,0.078,0.154,0.191,0.154,0.313 c0,0.12-0.061,0.237-0.154,0.314L2.492,17.717c-0.07,0.057-0.162,0.087-0.25,0.087l-0.176-0.04 c-0.136-0.065-0.222-0.207-0.222-0.361V0.402C1.844,0.25,1.93,0.107,2.067,0.043z"></path></svg>';
                 playBtn.addEventListener('click', function(e) {
                     const target = e.target;
-                    target.closest('div.iweb-video').querySelector('div.volume').classList.remove('show');
-                    const video = target.closest('div.iweb-video').querySelector('video');
+                    target.closest('div.iweby-video').querySelector('div.volume').classList.remove('show');
+                    const video = target.closest('div.iweby-video').querySelector('video');
                     if (video.paused) {
                         video.play();
-                        target.closest('div.iweb-video').querySelector('button.v-play-btn').innerHTML = '<svg viewBox="0 0 26 24" fill="#ffffff" stroke="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.163 3.819C5 4.139 5 4.559 5 5.4v13.2c0 .84 0 1.26.163 1.581a1.5 1.5 0 0 0 .656.655c.32.164.74.164 1.581.164h.2c.84 0 1.26 0 1.581-.163a1.5 1.5 0 0 0 .656-.656c.163-.32.163-.74.163-1.581V5.4c0-.84 0-1.26-.163-1.581a1.5 1.5 0 0 0-.656-.656C8.861 3 8.441 3 7.6 3h-.2c-.84 0-1.26 0-1.581.163a1.5 1.5 0 0 0-.656.656zm9 0C14 4.139 14 4.559 14 5.4v13.2c0 .84 0 1.26.164 1.581a1.5 1.5 0 0 0 .655.655c.32.164.74.164 1.581.164h.2c.84 0 1.26 0 1.581-.163a1.5 1.5 0 0 0 .655-.656c.164-.32.164-.74.164-1.581V5.4c0-.84 0-1.26-.163-1.581a1.5 1.5 0 0 0-.656-.656C17.861 3 17.441 3 16.6 3h-.2c-.84 0-1.26 0-1.581.163a1.5 1.5 0 0 0-.655.656z" fill="#ffffff"></path></svg>';
+                        target.closest('div.iweby-video').querySelector('button.v-play-btn').innerHTML = '<svg viewBox="0 0 26 24" fill="#ffffff" stroke="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.163 3.819C5 4.139 5 4.559 5 5.4v13.2c0 .84 0 1.26.163 1.581a1.5 1.5 0 0 0 .656.655c.32.164.74.164 1.581.164h.2c.84 0 1.26 0 1.581-.163a1.5 1.5 0 0 0 .656-.656c.163-.32.163-.74.163-1.581V5.4c0-.84 0-1.26-.163-1.581a1.5 1.5 0 0 0-.656-.656C8.861 3 8.441 3 7.6 3h-.2c-.84 0-1.26 0-1.581.163a1.5 1.5 0 0 0-.656.656zm9 0C14 4.139 14 4.559 14 5.4v13.2c0 .84 0 1.26.164 1.581a1.5 1.5 0 0 0 .655.655c.32.164.74.164 1.581.164h.2c.84 0 1.26 0 1.581-.163a1.5 1.5 0 0 0 .655-.656c.164-.32.164-.74.164-1.581V5.4c0-.84 0-1.26-.163-1.581a1.5 1.5 0 0 0-.656-.656C17.861 3 17.441 3 16.6 3h-.2c-.84 0-1.26 0-1.581.163a1.5 1.5 0 0 0-.655.656z" fill="#ffffff"></path></svg>';
                     }
                     else {
                         video.pause();
-                        target.closest('div.iweb-video').querySelector('button.v-play-btn').innerHTML = '<svg viewBox="0 0 20 20" fill="#ffffff" stroke="#ffffff"><path d="M2.067,0.043C2.21-0.028,2.372-0.008,2.493,0.085l13.312,8.503c0.094,0.078,0.154,0.191,0.154,0.313 c0,0.12-0.061,0.237-0.154,0.314L2.492,17.717c-0.07,0.057-0.162,0.087-0.25,0.087l-0.176-0.04 c-0.136-0.065-0.222-0.207-0.222-0.361V0.402C1.844,0.25,1.93,0.107,2.067,0.043z"></path></svg>';
+                        target.closest('div.iweby-video').querySelector('button.v-play-btn').innerHTML = '<svg viewBox="0 0 20 20" fill="#ffffff" stroke="#ffffff"><path d="M2.067,0.043C2.21-0.028,2.372-0.008,2.493,0.085l13.312,8.503c0.094,0.078,0.154,0.191,0.154,0.313 c0,0.12-0.061,0.237-0.154,0.314L2.492,17.717c-0.07,0.057-0.162,0.087-0.25,0.087l-0.176-0.04 c-0.136-0.065-0.222-0.207-0.222-0.361V0.402C1.844,0.25,1.93,0.107,2.067,0.043z"></path></svg>';
                     }
                 });
                 playDiv.appendChild(playBtn);
@@ -1422,7 +1422,7 @@ class iwebyKit {
                 volumeRange.value = '1';
                 volumeRange.addEventListener('input', function(e) {
                     const target = e.target;
-                    const video = target.closest('div.iweb-video').querySelector('video');
+                    const video = target.closest('div.iweby-video').querySelector('video');
                     video.volume = e.target.value;
                 });
                 volumeDiv.appendChild(volumeRange);
@@ -1436,7 +1436,7 @@ class iwebyKit {
                 fullscreenBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff"><path d="M21 9V8C21 5.79086 18.9853 4 16.5 4H15.25M21 15V16C21 18.2091 18.9853 20 16.5 20H15.25M3 15V16C3 18.2091 5.01472 20 7.5 20H8.75M3 9V8C3 5.79086 5.01472 4 7.5 4H8.75" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
                 fullscreenBtn.addEventListener('click', function(e) {
                     const target = e.target;
-                    const target_video = target.closest('div.iweb-video').querySelector('video'); 
+                    const target_video = target.closest('div.iweby-video').querySelector('video'); 
                     if (target_video.requestFullscreen) {
                         target_video.requestFullscreen();
                     } else if (target_video.mozRequestFullScreen) {
@@ -1446,7 +1446,7 @@ class iwebyKit {
                     } else if (target_video.msRequestFullscreen) {
                         target_video.msRequestFullscreen();
                     }
-                    target.closest('div.iweb-video').querySelector('div.volume').classList.remove('show');
+                    target.closest('div.iweby-video').querySelector('div.volume').classList.remove('show');
                 });
                 fullscreenDiv.appendChild(fullscreenBtn);
 
@@ -1460,9 +1460,9 @@ class iwebyKit {
                 progressRange.value = '0';
                 progressRange.addEventListener('input', function(e) {
                     const target = e.target;
-                    const video = target.closest('div.iweb-video').querySelector('video');
+                    const video = target.closest('div.iweby-video').querySelector('video');
                     video.currentTime = parseFloat((e.target.value / 100) * video.duration);
-                    target.closest('div.iweb-video').querySelector('div.volume').classList.remove('show');
+                    target.closest('div.iweby-video').querySelector('div.volume').classList.remove('show');
                 });
 
                 progressDiv.appendChild(progressRange);
@@ -1478,7 +1478,7 @@ class iwebyKit {
                     wrapper.appendChild(controls);
                 }
                 else {
-                    e.closest('div.iweb-responsive').appendChild(controls);
+                    e.closest('div.iweby-responsive').appendChild(controls);
                 }
             }
         });
@@ -1490,7 +1490,7 @@ class iwebyKit {
 
     responsive() {
         const thisInstance = this;
-        const responsiveElements = document.querySelectorAll('div.iweb-responsive');
+        const responsiveElements = document.querySelectorAll('div.iweby-responsive');
         if (responsiveElements.length > 0) {
             responsiveElements.forEach(function(e) {
                 let currentWidth = e.clientWidth;
@@ -1516,7 +1516,7 @@ class iwebyKit {
     
     responsiveTable() {
         const thisInstance = this;
-        const rtable = document.querySelectorAll('table.iweb-table');
+        const rtable = document.querySelectorAll('table.iweby-table');
         if(rtable.length > 0) {
             rtable.forEach(function(table) {
                 const switch_width = (table.dataset.rw || 600);
@@ -1796,7 +1796,7 @@ class iwebyKit {
                 // Bind event for form submit
                 form.addEventListener('submit', thisInstance.deBounce(function() {
                     // Remove error & tips
-                    const tipsMessageArea = document.querySelector('div.iweb-tips-message');
+                    const tipsMessageArea = document.querySelector('div.iweby-tips-message');
                     if (tipsMessageArea) {
                         tipsMessageArea.classList.remove('error');
                         tipsMessageArea.classList.remove('success');
@@ -1805,7 +1805,7 @@ class iwebyKit {
 
                     const errorElements = form.querySelectorAll('.error');
                     errorElements.forEach(function(e) {
-                        if (!e.closest('div.iweb-tips-message')) {
+                        if (!e.closest('div.iweby-tips-message')) {
                             e.classList.remove('error');
                         }
                     });
@@ -1822,131 +1822,131 @@ class iwebyKit {
                         requiredInputs.forEach(function(input) {
                             const validationArray = (input.getAttribute('data-validation').toString().split('|'));
                             if (thisInstance.isMatch(input.type, 'checkbox')) {
-                                if (validationArray.includes('required') && input.closest('div.iweb-checkbox-set') && !input.closest('div.iweb-checkbox-set').querySelector('input[type="checkbox"]:checked')) {
-                                    if (showTips && !input.closest('div.iweb-checkbox-set').querySelector('small.tips')) {
+                                if (validationArray.includes('required') && input.closest('div.iweby-checkbox-set') && !input.closest('div.iweby-checkbox-set').querySelector('input[type="checkbox"]:checked')) {
+                                    if (showTips && !input.closest('div.iweby-checkbox-set').querySelector('small.tips')) {
                                         const errorTips = document.createElement('small');
                                         errorTips.classList.add('tips');
                                         errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorRequired'];
-                                        input.closest('div.iweb-checkbox-set').appendChild(errorTips);
+                                        input.closest('div.iweby-checkbox-set').appendChild(errorTips);
                                     }
-                                    input.closest('div.iweb-checkbox').classList.add('error');
+                                    input.closest('div.iweby-checkbox').classList.add('error');
                                     canSubmit = false;
                                 }
                             } 
                             else if (thisInstance.isMatch(input.type, 'radio')) {
-                                if (validationArray.includes('required') && input.closest('div.iweb-radio-set') && !input.closest('div.iweb-radio-set').querySelector('input[type="radio"]:checked')) {
-                                    if (showTips && !input.closest('div.iweb-radio-set').querySelector('small.tips')) {
+                                if (validationArray.includes('required') && input.closest('div.iweby-radio-set') && !input.closest('div.iweby-radio-set').querySelector('input[type="radio"]:checked')) {
+                                    if (showTips && !input.closest('div.iweby-radio-set').querySelector('small.tips')) {
                                         const errorTips = document.createElement('small');
                                         errorTips.classList.add('tips');
                                         errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorRequired'];
-                                        input.closest('div.iweb-radio-set').appendChild(errorTips);
+                                        input.closest('div.iweby-radio-set').appendChild(errorTips);
                                     }
-                                    input.closest('div.iweb-radio').classList.add('error');
+                                    input.closest('div.iweby-radio').classList.add('error');
                                     canSubmit = false;
                                 }
                             } 
                             else if (thisInstance.isMatch(input.type, 'select-one') || thisInstance.isMatch(input.type, 'select-multiple')) {
                                 if (validationArray.includes('required') && !thisInstance.isValue(input.value)) {
-                                    if (showTips && !input.closest('div.iweb-select').querySelector('small.tips')) {
+                                    if (showTips && !input.closest('div.iweby-select').querySelector('small.tips')) {
                                         const errorTips = document.createElement('small');
                                         errorTips.classList.add('tips');
                                         errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorRequired'];
-                                        input.closest('div.iweb-select').appendChild(errorTips);
+                                        input.closest('div.iweby-select').appendChild(errorTips);
                                     }
-                                    input.closest('div.iweb-select').classList.add('error');
+                                    input.closest('div.iweby-select').classList.add('error');
                                     canSubmit = false;
                                 }
                             } 
                             else {
                                 if (validationArray.includes('required') && !thisInstance.isValue(input.value)) {
-                                    if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                    if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                         const errorTips = document.createElement('small');
                                         errorTips.classList.add('tips');
                                         errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorRequired'];
-                                        input.closest('div.iweb-input').appendChild(errorTips);
+                                        input.closest('div.iweby-input').appendChild(errorTips);
                                     }
-                                    input.closest('div.iweb-input').classList.add('error');
+                                    input.closest('div.iweby-input').classList.add('error');
                                     canSubmit = false;
                                 } 
                                 else if (thisInstance.isValue(input.value)) {
                                     let nextRegex = true;
                                     if ((validationArray.includes('number')) && !thisInstance.isNumber(input.value)) {
-                                        if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                        if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                             const errorTips = document.createElement('small');
                                             errorTips.classList.add('tips');
                                             errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorNumberFormat'];
-                                            input.closest('div.iweb-input').appendChild(errorTips);
+                                            input.closest('div.iweby-input').appendChild(errorTips);
                                         }
-                                        input.closest('div.iweb-input').classList.add('error');
+                                        input.closest('div.iweby-input').classList.add('error');
                                         canSubmit = false;
                                         nextRegex = false;
                                     } 
                                     else if ((validationArray.includes('email')) && !thisInstance.isEmail(input.value)) {
-                                        if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                        if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                             const errorTips = document.createElement('small');
                                             errorTips.classList.add('tips');
                                             errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorEmailFormat'];
-                                            input.closest('div.iweb-input').appendChild(errorTips);
+                                            input.closest('div.iweby-input').appendChild(errorTips);
                                         }
-                                        input.closest('div.iweb-input').classList.add('error');
+                                        input.closest('div.iweby-input').classList.add('error');
                                         canSubmit = false;
                                         nextRegex = false;
                                     } 
                                     else if ((validationArray.includes('password')) && !thisInstance.isPassword(input.value)) {
-                                        if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                        if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                             const errorTips = document.createElement('small');
                                             errorTips.classList.add('tips');
                                             errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorPasswordFormat'];
-                                            input.closest('div.iweb-input').appendChild(errorTips);
+                                            input.closest('div.iweby-input').appendChild(errorTips);
                                         }
-                                        input.closest('div.iweb-input').classList.add('error');
+                                        input.closest('div.iweby-input').classList.add('error');
                                         canSubmit = false;
                                         nextRegex = false;
                                     } 
                                     else if ((validationArray.includes('date')) && !thisInstance.isDate(input.value)) {
-                                        if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                        if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                             const errorTips = document.createElement('small');
                                             errorTips.classList.add('tips');
                                             errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorDateFormat'];
-                                            input.closest('div.iweb-input').appendChild(errorTips);
+                                            input.closest('div.iweby-input').appendChild(errorTips);
                                         }
-                                        input.closest('div.iweb-input').classList.add('error');
+                                        input.closest('div.iweby-input').classList.add('error');
                                         canSubmit = false;
                                         nextRegex = false;
                                     } 
                                     else if ((validationArray.includes('time')) && !thisInstance.isTime(input.value)) {
-                                        if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                        if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                             const errorTips = document.createElement('small');
                                             errorTips.classList.add('tips');
                                             errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorTimeFormat'];
-                                            input.closest('div.iweb-input').appendChild(errorTips);
+                                            input.closest('div.iweby-input').appendChild(errorTips);
                                         }
-                                        input.closest('div.iweb-input').classList.add('error');
+                                        input.closest('div.iweby-input').classList.add('error');
                                         canSubmit = false;
                                         nextRegex = false;
                                     } 
                                     else if ((validationArray.includes('ge0'))) {
                                         if (!thisInstance.isNumber(input.value)) {
-                                            if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                            if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                                 const errorTips = document.createElement('small');
                                                 errorTips.classList.add('tips');
                                                 errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorNumberFormat'];
-                                                input.closest('div.iweb-input').appendChild(errorTips);
+                                                input.closest('div.iweby-input').appendChild(errorTips);
                                             }
-                                            input.closest('div.iweb-input').classList.add('error');
+                                            input.closest('div.iweby-input').classList.add('error');
                                             canSubmit = false;
                                             nextRegex = false;
                                         } 
                                         else {
                                             const regex = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
                                             if (!regex.test(input.value)) {
-                                                if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                                if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                                     const errorTips = document.createElement('small');
                                                     errorTips.classList.add('tips');
                                                     errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorGE0'];
-                                                    input.closest('div.iweb-input').appendChild(errorTips);
+                                                    input.closest('div.iweby-input').appendChild(errorTips);
                                                 }
-                                                input.closest('div.iweb-input').classList.add('error');
+                                                input.closest('div.iweby-input').classList.add('error');
                                                 canSubmit = false;
                                                 nextRegex = false;
                                             }
@@ -1954,24 +1954,24 @@ class iwebyKit {
                                     } 
                                     else if ((validationArray.includes('gt0'))) {
                                         if (!thisInstance.isNumber(input.value)) {
-                                            if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                            if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                                 const errorTips = document.createElement('small');
                                                 errorTips.classList.add('tips');
                                                 errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorNumberFormat'];
-                                                input.closest('div.iweb-input').appendChild(errorTips);
+                                                input.closest('div.iweby-input').appendChild(errorTips);
                                             }
-                                            input.closest('div.iweb-input').classList.add('error');
+                                            input.closest('div.iweby-input').classList.add('error');
                                             canSubmit = false;
                                             nextRegex = false;
                                         } 
                                         else if (parseFloat(input.value) <= 0) {
-                                            if (showTips && !input.closest('div.iweb-input').querySelector('small.tips')) {
+                                            if (showTips && !input.closest('div.iweby-input').querySelector('small.tips')) {
                                                 const errorTips = document.createElement('small');
                                                 errorTips.classList.add('tips');
                                                 errorTips.textContent = thisInstance.language[thisInstance.currentLangCode]['errorGT0'];
-                                                input.closest('div.iweb-input').appendChild(errorTips);
+                                                input.closest('div.iweby-input').appendChild(errorTips);
                                             }
-                                            input.closest('div.iweb-input').classList.add('error');
+                                            input.closest('div.iweby-input').classList.add('error');
                                             canSubmit = false;
                                             nextRegex = false;
                                         }
@@ -1981,13 +1981,13 @@ class iwebyKit {
                                         const regex = new RegExp(input.getAttribute('data-regex'));
                                         const regexError = input.getAttribute('data-error');
                                         if (!regex.test(input.value.toString().toLowerCase())) {
-                                            if (showTips && !input.closest('div.iweb-input').querySelector('small.tips') && thisInstance.isValue(regexError)) {
+                                            if (showTips && !input.closest('div.iweby-input').querySelector('small.tips') && thisInstance.isValue(regexError)) {
                                                 const errorTips = document.createElement('small');
                                                 errorTips.classList.add('tips');
                                                 errorTips.textContent = regexError.toString();
-                                                input.closest('div.iweb-input').appendChild(errorTips);
+                                                input.closest('div.iweby-input').appendChild(errorTips);
                                             }
-                                            input.closest('div.iweb-input').classList.add('error');
+                                            input.closest('div.iweby-input').classList.add('error');
                                             canSubmit = false;
                                         }
                                     }
@@ -2075,7 +2075,7 @@ class iwebyKit {
                         });
                     } 
                     else if (!canSubmit && extraCanSubmit) {
-                        const tipsMessageArea = document.querySelector('div.iweb-tips-message');
+                        const tipsMessageArea = document.querySelector('div.iweby-tips-message');
                         if (tipsMessageArea) {
                             thisInstance.tipsMsg(thisInstance.language[thisInstance.currentLangCode]['errorRequiredAll'], false);
                         }
@@ -2099,17 +2099,17 @@ class iwebyKit {
                                 }));
                             } 
                             else {
-                                if (element.closest('div.iweb-input-autocomplete')) {
+                                if (element.closest('div.iweby-input-autocomplete')) {
                                     // Remove error & tips
-                                    element.closest('div.iweb-input-autocomplete').classList.remove('error');
-                                    const oriSmallTips = element.closest('div.iweb-input-autocomplete').querySelector('small.tips');
+                                    element.closest('div.iweby-input-autocomplete').classList.remove('error');
+                                    const oriSmallTips = element.closest('div.iweby-input-autocomplete').querySelector('small.tips');
                                     if(oriSmallTips) {
                                         oriSmallTips.remove();
                                     }
 
-                                    const fillID = element.closest('div.iweb-input-autocomplete').querySelector('input.fill-id');
-                                    const fillText = element.closest('div.iweb-input-autocomplete').querySelector('input.fill-text');
-                                    const oriFillReset = element.closest('div.iweb-input-autocomplete').querySelector('a.fill-reset');
+                                    const fillID = element.closest('div.iweby-input-autocomplete').querySelector('input.fill-id');
+                                    const fillText = element.closest('div.iweby-input-autocomplete').querySelector('input.fill-text');
+                                    const oriFillReset = element.closest('div.iweby-input-autocomplete').querySelector('a.fill-reset');
                                     if(oriFillReset) {
                                         oriFillReset.remove();
                                     }
@@ -2131,7 +2131,7 @@ class iwebyKit {
 
                                         // Append elements
                                         fillReset.appendChild(fillResetIcon);
-                                        element.closest('div.iweb-input-autocomplete').appendChild(fillReset);
+                                        element.closest('div.iweby-input-autocomplete').appendChild(fillReset);
                                     }
                                 } 
                                 else {
@@ -2225,9 +2225,9 @@ class iwebyKit {
                     thisInstance.uploaderPreview(thisInstance.uploaderFiles.selectedFiles);
 
                     // Event handlers
-                    const startAllButton = document.querySelector('div.iweb-info-dialog.uploader > div > div.content > div > div.action > button.start-all');
-                    const closeAllButton = document.querySelector('div.iweb-info-dialog.uploader > div > div.content > div > div.action > button.close');
-                    const listContainer = document.querySelector('div.iweb-info-dialog.uploader > div > div.content > div > div.list');
+                    const startAllButton = document.querySelector('div.iweby-info-dialog.uploader > div > div.content > div > div.action > button.start-all');
+                    const closeAllButton = document.querySelector('div.iweby-info-dialog.uploader > div > div.content > div > div.action > button.close');
+                    const listContainer = document.querySelector('div.iweby-info-dialog.uploader > div > div.content > div > div.list');
 
                     startAllButton.addEventListener('click', thisInstance.deBounce(function() {
                         const items = listContainer.querySelectorAll('div.item');
@@ -2239,7 +2239,7 @@ class iwebyKit {
                     }));
 
                     closeAllButton.addEventListener('click', thisInstance.deBounce(function() {
-                        document.querySelector('div.iweb-info-dialog.uploader > div > div.content > a.btn-close').dispatchEvent(new Event('click', {
+                        document.querySelector('div.iweby-info-dialog.uploader > div > div.content > a.btn-close').dispatchEvent(new Event('click', {
                             bubbles: true
                         }));
                     }));
@@ -2257,7 +2257,7 @@ class iwebyKit {
                             thisInstance.uploaderFilesIgnore.selectedFiles.push(target.closest('div.item').getAttribute('data-index').toString());
                             target.closest('div.item').remove();
                             if (listContainer.querySelectorAll('div.item').length === 0) {
-                                document.querySelector('div.iweb-info-dialog.uploader > div > div.content > a.btn-close').dispatchEvent(new Event('click', {
+                                document.querySelector('div.iweby-info-dialog.uploader > div > div.content > a.btn-close').dispatchEvent(new Event('click', {
                                     bubbles: true
                                 }));
                             }
@@ -2325,7 +2325,7 @@ class iwebyKit {
             thisInstance.uploaderOptions['inline_selectedFiles_' + thisInstance.md5.hash(fileInputID)].maxErrorMessage = thisInstance.uploaderOptions['inline_selectedFiles_' + thisInstance.md5.hash(fileInputID)].maxErrorMessage.replace('{num}', thisInstance.uploaderOptions['inline_selectedFiles_' + thisInstance.md5.hash(fileInputID)].maxFileSize);
 
             if (thisInstance.isValue(thisInstance.uploaderOptions['inline_selectedFiles_' + thisInstance.md5.hash(fileInputID)].url) && fileInput.files.length > 0) {
-                const uploaderAreDiv = target.closest('div.iweb-files-dropzone').querySelector('div.iweb-files-uploader');
+                const uploaderAreDiv = target.closest('div.iweby-files-dropzone').querySelector('div.iweby-files-uploader');
 
                 // Create div for button
                 const uploaderDiv = document.createElement('div');
@@ -2396,11 +2396,11 @@ class iwebyKit {
 
         // Append elements
         const parent = fileInput.parentElement;
-        parent.id = fileInputID + '-iweb-files-dropzone';
-        parent.classList.add('iweb-files-dropzone');
+        parent.id = fileInputID + '-iweby-files-dropzone';
+        parent.classList.add('iweby-files-dropzone');
 
         const uploaderDiv = document.createElement('div');
-        uploaderDiv.className = 'iweb-files-uploader';
+        uploaderDiv.className = 'iweby-files-uploader';
         parent.appendChild(uploaderDiv);
     }
 
@@ -2515,8 +2515,8 @@ class iwebyKit {
         itemDiv.appendChild(removeButton);
 
         const dropzone = thisInstance.isValue(fileInputID) ?
-            '#' + fileInputID + '-iweb-files-dropzone > div.iweb-files-uploader > div.list' :
-            'div.iweb-info-dialog.uploader > div > div.content > div > div.list';
+            '#' + fileInputID + '-iweby-files-dropzone > div.iweby-files-uploader > div.list' :
+            'div.iweby-info-dialog.uploader > div > div.content > div > div.list';
 
         document.querySelector(dropzone).appendChild(itemDiv);
 
@@ -2534,7 +2534,7 @@ class iwebyKit {
 
         // Helper function to safely call if the function is defined
         const safeEndFunction = () => {
-            const uploaderDialog = (thisInstance.isValue(fileInputID)) ? document.querySelector('#' + fileInputID + '-iweb-files-dropzone') : document.querySelector('div.iweb-info-dialog.uploader');
+            const uploaderDialog = (thisInstance.isValue(fileInputID)) ? document.querySelector('#' + fileInputID + '-iweby-files-dropzone') : document.querySelector('div.iweby-info-dialog.uploader');
             if (uploaderDialog) {
                 const startCount = uploaderDialog.querySelectorAll('div.list > div.item > button.start').length;
                 if (parseInt(startCount) === 0) {
@@ -2553,7 +2553,7 @@ class iwebyKit {
             }
         };
 
-        const uploaderDialog = (thisInstance.isValue(fileInputID)) ? document.querySelector('#' + fileInputID + '-iweb-files-dropzone') : document.querySelector('div.iweb-info-dialog.uploader');
+        const uploaderDialog = (thisInstance.isValue(fileInputID)) ? document.querySelector('#' + fileInputID + '-iweby-files-dropzone') : document.querySelector('div.iweby-info-dialog.uploader');
         uploaderDialog.classList.add('busy');
 
         // Init
@@ -2692,7 +2692,7 @@ class iwebyKit {
     // dialog
     alert(message, callBack, customizeClassName) {
         // Prevent duplicate dialogs
-        if (document.querySelectorAll('div.iweb-alert-dialog').length > 0) {
+        if (document.querySelectorAll('div.iweby-alert-dialog').length > 0) {
             return;
         }
 
@@ -2700,7 +2700,7 @@ class iwebyKit {
         if (thisInstance.isValue(message)) {
             // Create div
             const alertDialog = document.createElement('div');
-            alertDialog.classList.add('iweb-alert-dialog');
+            alertDialog.classList.add('iweby-alert-dialog');
             if (thisInstance.isValue(customizeClassName)) {
                 alertDialog.classList.add(customizeClassName);
             }
@@ -2726,9 +2726,9 @@ class iwebyKit {
                 contentDiv.style.transform = 'translateY(-320%)';
                 contentDiv.style.transform = '0';
                 contentDiv.addEventListener('transitionend', function() {
-                    target.closest('div.iweb-alert-dialog').remove();
-                    if (document.querySelectorAll('div.iweb-alert-dialog').length === 0 && document.querySelectorAll('div.iweb-info-dialog').length === 0) {
-                        document.body.classList.remove('iweb-disable-scroll');
+                    target.closest('div.iweby-alert-dialog').remove();
+                    if (document.querySelectorAll('div.iweby-alert-dialog').length === 0 && document.querySelectorAll('div.iweby-info-dialog').length === 0) {
+                        document.body.classList.remove('iweby-disable-scroll');
                     }
 
                     // Callback
@@ -2741,13 +2741,13 @@ class iwebyKit {
             }));
 
             // Append to body
-            const viewer = document.querySelector('div.iweb-viewer');
+            const viewer = document.querySelector('div.iweby-viewer');
             innerDiv.appendChild(contentDiv);
             contentDiv.appendChild(detailsDiv);
             contentDiv.appendChild(closeButton);
             alertDialog.appendChild(innerDiv);
             viewer.insertBefore(alertDialog, viewer.firstChild);
-            document.body.classList.add('iweb-disable-scroll');
+            document.body.classList.add('iweby-disable-scroll');
 
             // Show dialog
             setTimeout(function() {
@@ -2766,7 +2766,7 @@ class iwebyKit {
 
     confirm(message, callBack, customizeClassName) {
         // Prevent duplicate dialogs
-        if (document.querySelectorAll('div.iweb-alert-dialog').length > 0) {
+        if (document.querySelectorAll('div.iweby-alert-dialog').length > 0) {
             return;
         }
 
@@ -2774,7 +2774,7 @@ class iwebyKit {
         if (thisInstance.isValue(message)) {
             // Create div
             const alertDialog = document.createElement('div');
-            alertDialog.classList.add('iweb-alert-dialog');
+            alertDialog.classList.add('iweby-alert-dialog');
             if (thisInstance.isValue(customizeClassName)) {
                 alertDialog.classList.add(customizeClassName);
             }
@@ -2800,9 +2800,9 @@ class iwebyKit {
                 contentDiv.style.transform = 'translateY(-320%)';
                 contentDiv.style.transform = '0';
                 contentDiv.addEventListener('transitionend', function() {
-                    target.closest('div.iweb-alert-dialog').remove();
-                    if (document.querySelectorAll('div.iweb-alert-dialog').length === 0 && document.querySelectorAll('div.iweb-info-dialog').length === 0) {
-                        document.body.classList.remove('iweb-disable-scroll');
+                    target.closest('div.iweby-alert-dialog').remove();
+                    if (document.querySelectorAll('div.iweby-alert-dialog').length === 0 && document.querySelectorAll('div.iweby-info-dialog').length === 0) {
+                        document.body.classList.remove('iweby-disable-scroll');
                     }
 
                     // Callback
@@ -2824,9 +2824,9 @@ class iwebyKit {
                 contentDiv.style.transform = 'translateY(-320%)';
                 contentDiv.style.transform = '0';
                 contentDiv.addEventListener('transitionend', function() {
-                    target.closest('div.iweb-alert-dialog').remove();
-                    if (document.querySelectorAll('div.iweb-alert-dialog').length === 0 && document.querySelectorAll('div.iweb-info-dialog').length === 0) {
-                        document.body.classList.remove('iweb-disable-scroll');
+                    target.closest('div.iweby-alert-dialog').remove();
+                    if (document.querySelectorAll('div.iweby-alert-dialog').length === 0 && document.querySelectorAll('div.iweby-info-dialog').length === 0) {
+                        document.body.classList.remove('iweby-disable-scroll');
                     }
 
                     // Callback
@@ -2839,14 +2839,14 @@ class iwebyKit {
             }));
 
             // Append to body
-            const viewer = document.querySelector('div.iweb-viewer');
+            const viewer = document.querySelector('div.iweby-viewer');
             innerDiv.appendChild(contentDiv);
             contentDiv.appendChild(detailsDiv);
             contentDiv.appendChild(yesButton);
             contentDiv.appendChild(noButton);
             alertDialog.appendChild(innerDiv);
             viewer.insertBefore(alertDialog, viewer.firstChild);
-            document.body.classList.add('iweb-disable-scroll');
+            document.body.classList.add('iweby-disable-scroll');
 
             setTimeout(function() {
                 thisInstance.showBusy(false);
@@ -2864,7 +2864,7 @@ class iwebyKit {
 
     dialog(htmlContent, initFunc, callBack, customizeClassName) {
         // Prevent duplicate dialogs
-        if (document.querySelector('div.iweb-info-dialog')) {
+        if (document.querySelector('div.iweby-info-dialog')) {
             return;
         }
 
@@ -2872,7 +2872,7 @@ class iwebyKit {
         if (thisInstance.isValue(htmlContent)) {
             // Create div
             const infoDialog = document.createElement('div');
-            infoDialog.classList.add('iweb-info-dialog');
+            infoDialog.classList.add('iweby-info-dialog');
             if (thisInstance.isValue(customizeClassName)) {
                 infoDialog.classList.add(customizeClassName);
             }
@@ -2901,9 +2901,9 @@ class iwebyKit {
                 contentDiv.style.transform = 'translateY(-320%)';
                 contentDiv.style.transform = '0';
                 contentDiv.addEventListener('transitionend', function() {
-                    target.closest('div.iweb-info-dialog').remove();
-                    if (document.querySelectorAll('div.iweb-alert-dialog').length === 0 && document.querySelectorAll('div.iweb-info-dialog').length === 0) {
-                        document.body.classList.remove('iweb-disable-scroll');
+                    target.closest('div.iweby-info-dialog').remove();
+                    if (document.querySelectorAll('div.iweby-alert-dialog').length === 0 && document.querySelectorAll('div.iweby-info-dialog').length === 0) {
+                        document.body.classList.remove('iweby-disable-scroll');
                     }
 
                     // Callback
@@ -2916,13 +2916,13 @@ class iwebyKit {
             }));
 
             // Append to body
-            const viewer = document.querySelector('div.iweb-viewer');
+            const viewer = document.querySelector('div.iweby-viewer');
             innerDiv.appendChild(contentDiv);
             contentDiv.appendChild(detailsDiv);
             contentDiv.appendChild(closeButton);
             infoDialog.appendChild(innerDiv);
             viewer.insertBefore(infoDialog, viewer.firstChild);
-            document.body.classList.add('iweb-disable-scroll');
+            document.body.classList.add('iweby-disable-scroll');
 
             // Show dialog
             setTimeout(function() {
@@ -2964,12 +2964,12 @@ class iwebyKit {
         
         if (thisInstance.isValue(message)) {
             let tipsMessageArea = null;
-            const popupDialog = document.querySelector('div.iweb-info-dialog') || document.querySelector('div.imodal-dialog.current');
+            const popupDialog = document.querySelector('div.iweby-info-dialog') || document.querySelector('div.imodal-dialog.current');
             if(thisInstance.isValue(popupDialog)) {
-                tipsMessageArea = popupDialog.querySelector('div.iweb-tips-message');
+                tipsMessageArea = popupDialog.querySelector('div.iweby-tips-message');
             }
             else {
-                tipsMessageArea = document.querySelector('div.iweb-tips-message');
+                tipsMessageArea = document.querySelector('div.iweby-tips-message');
             }
             
             if (thisInstance.isValue(tipsMessageArea)) {
@@ -2987,7 +2987,7 @@ class iwebyKit {
                 divElement.appendChild(closeButton);
                 divElement.appendChild(messageSpan);
                 tipsMessageArea.appendChild(divElement);
-                thisInstance.scrollTo('div.iweb-tips-message', defaultOffset);
+                thisInstance.scrollTo('div.iweby-tips-message', defaultOffset);
                 // Callback
                 if ((typeof callBack) === 'function') {
                     callBack();
@@ -3378,7 +3378,7 @@ class iwebyKit {
         const thisInstance = this;
 
         if (thisInstance.isMatch(status, 1) || thisInstance.isMatch(status, true)) {
-            if (document.querySelectorAll('div.iweb-processing').length === 0) {
+            if (document.querySelectorAll('div.iweby-processing').length === 0) {
                 // Init opacity based on value
                 let opacity = 1;
                 if (thisInstance.isNumber(value, true)) {
@@ -3387,7 +3387,7 @@ class iwebyKit {
 
                 // Create the main div
                 const processingDiv = document.createElement('div');
-                processingDiv.classList.add('iweb-processing');
+                processingDiv.classList.add('iweby-processing');
                 if (parseFloat(opacity) === 0) {
                     processingDiv.style.opacity = 0;
                 } 
@@ -3448,7 +3448,7 @@ class iwebyKit {
                 microsecond = parseInt(value);
             }
             setTimeout(function() {
-                const processingDivs = document.querySelectorAll('div.iweb-processing');
+                const processingDivs = document.querySelectorAll('div.iweby-processing');
                 processingDivs.forEach(function(div) {
                     div.remove();
                 });
@@ -4312,7 +4312,7 @@ class iPagination {
     }
 
     renderPagination(element) {
-        if (!element.querySelector('div.iweb-pagination')) {
+        if (!element.querySelector('div.iweby-pagination')) {
             let pageSize = element.getAttribute('data-size') || this.options.size;
             let totalPage = element.getAttribute('data-totalpage') || this.options.total;
 
@@ -4335,7 +4335,7 @@ class iPagination {
 
             if (totalPage > 1) {
                 // Create pagination container
-                const paginationContainer = this.createPaginationElement('div', 'iweb-pagination');
+                const paginationContainer = this.createPaginationElement('div', 'iweby-pagination');
                 const paginationList = this.createPaginationElement('ul');
 
                 // First Page
