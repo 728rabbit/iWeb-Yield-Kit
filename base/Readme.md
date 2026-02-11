@@ -1,7 +1,7 @@
 <link href="base/icons/font-awesome.min.css" rel="stylesheet" type="text/css"/>
 <link href="base/iweby.kit.min.css" rel="stylesheet" type="text/css">
 <script src="base/iweby.kit.min.js" type="text/javascript"></script>
-<script>const iweb = (new iwebyKit()).init();</script>
+<script>const iweby = (new iwebyKit()).init();</script>
 
 --------------------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ json_encode([
 
 4. Checkbox - iweb.checkBox();
 
-<div class="iweb-checkbox-set">
+<div class="iweby-checkbox-set">
     <div>
         <input type="checkbox" id="promotional_method_1" name="promotional_method[]" value="email" data-validation="required" checked>
         <label for="promotional_method_1">Email</label>
@@ -84,7 +84,7 @@ json_encode([
 
 5. Raido - iweb.radioBox();
 
-<div class="iweb-radio-set">
+<div class="iweby-radio-set">
     <div>
         <input type="radio" id="male" name="gender" value="male" data-validation="required">
         <label for="male">M</label>
@@ -100,7 +100,7 @@ json_encode([
 
 6. Responsive Div - iweb.responsive();
 
-<div class="iweb-responsive" data-width="1280" data-height="712"></div>
+<div class="iweby-responsive" data-width="1280" data-height="712"></div>
 
 --------------------------------------------------------------------------------
 
@@ -265,64 +265,64 @@ randomString(length)
 
 16. Callback - DOMContentLoaded
 
-function iwebCommonLayout(function(win_width) { });
+function iwebyCommonLayout(function(win_width) { });
 
-function iwebLayout(function(win_width) { });
+function iwebyLayout(function(win_width) { });
 
-function iwebChildLayout(function(win_width) { });
+function iwebyChildLayout(function(win_width) { });
 
-function iwebExtraLayout(function(win_width) { });
+function iwebyExtraLayout(function(win_width) { });
 
 
-function iwebCommonFunc(function() { });
+function iwebyCommonFunc(function() { });
 
-function iwebFunc(function() { });
+function iwebyFunc(function() { });
 
-function iwebChildFunc(function() { });
+function iwebyChildFunc(function() { });
 
-function iwebExtraFunc(function() { });
+function iwebyExtraFunc(function() { });
 
 --------------------------------------------------------------------------------
 
 17. Callback - windowLoaded
 
-function iwebCommonLayoutEnd(function(win_width) { });
+function iwebyCommonLayoutEnd(function(win_width) { });
 
-function iwebLayoutEnd(function(win_width) { });
+function iwebyLayoutEnd(function(win_width) { });
 
-function iwebChildEnd(function(win_width) { });
+function iwebyChildEnd(function(win_width) { });
 
-function iwebExtraLayoutEnd(function(win_width) { });
+function iwebyExtraLayoutEnd(function(win_width) { });
 
 
-function iwebCommonFuncEnd(function() { });
+function iwebyCommonFuncEnd(function() { });
 
-function iwebFuncEnd(function() { });
+function iwebyFuncEnd(function() { });
 
-function iwebChildFuncEnd(function() { });
+function iwebyChildFuncEnd(function() { });
 
-function iwebExtraFuncEnd(function() { });
+function iwebyExtraFuncEnd(function() { });
 
 --------------------------------------------------------------------------------
 
 18. Callback - windowResize
 
-function iwebCommonLayout(function(win_width) { });
+function iwebyCommonLayout(function(win_width) { });
 
-function iwebLayout(function(win_width) { });
+function iwebyLayout(function(win_width) { });
 
-function iwebChildLayout(function(win_width) { });
+function iwebyChildLayout(function(win_width) { });
 
-function iwebExtraLayout(function(win_width) { });
+function iwebyExtraLayout(function(win_width) { });
 
 --------------------------------------------------------------------------------
 
 19. Callback - windowScroll
 
-function iwebCommonScroll(function(scroll_top) { });
+function iwebyCommonScroll(function(scroll_top) { });
 
-function iwebScroll(function(scroll_top) { });
+function iwebyScroll(function(scroll_top) { });
 
-function iwebChildScroll(function(scroll_top) { });
+function iwebyChildScroll(function(scroll_top) { });
 
-function iwebExtraScroll(function(scroll_top) { });
+function iwebyExtraScroll(function(scroll_top) { });
