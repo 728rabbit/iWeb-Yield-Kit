@@ -1,4 +1,76 @@
+/**
+ * iwebyCalendar - A comprehensive, interactive calendar/scheduling component
+ * 
+ * This class creates a feature-rich calendar with multiple display modes (month, week, day),
+ * resource management, event rendering with drag-and-drop, and data fetching capabilities.
+ * 
+ * @example
+ * // Basic usage
+ * const calendar = new iwebyCalendar({
+ *     elementID: 'myCalendar',
+ *     lang: 'en',
+ *     displayMode: 'week',
+ *     date: '2024-12-25',
+ *     startHm: 800,      // 08:00
+ *     endHm: 2200,       // 22:00
+ *     interval: 15,      // 15-minute intervals
+ *     maxHeight: '600px',
+ *     resources: '/api/resources',
+ *     events: '/api/events',
+ *     eventTemplate: function(event) {
+ *         return `<strong>${event.title}</strong><br/>${event.description}`;
+ *     },
+ *     eventClick: function(event) {
+ *         console.log('Event clicked:', event);
+ *     }
+ * }).init();
+ * 
+ * // Refresh with new data
+ * calendar.refresh(newResources, newEvents);
+ * 
+ * // Change view mode
+ * calendar.changeMode('month');
+ * 
+ * // Navigate dates
+ * calendar.changeDate(1);   // Next day/week/month
+ * calendar.changeDate(-1);  // Previous day/week/month
+ * 
+ * // HTML structure required:
+ * // <div id="myCalendar"></div>
+ * 
+ * // Event data format:
+ * // {
+ * //     id: 1,
+ * //     resourceId: 1,      // Maps to resource.id
+ * //     targetDate: '2024-12-25',
+ * //     startHm: 900,       // 09:00
+ * //     endHm: 1000,        // 10:00
+ * //     title: 'Meeting',
+ * //     description: 'Team meeting',
+ * //     content: 'Meeting details',
+ * //     short_content: 'Meeting',
+ * //     background: '#3788d8' // Optional color
+ * // }
+ */
 class iwebyCalendar {
+    /**
+     * Creates a new calendar instance
+     * @param {Object} config - Configuration options
+     * @param {string} config.elementID - DOM element ID (default: 'iwebycalendar')
+     * @param {string} config.lang - Language: 'en' or 'zh' (default: 'en')
+     * @param {string} config.displayMode - View mode: 'day', 'week', or 'month' (default: 'day')
+     * @param {string|Date} config.date - Initial date to display
+     * @param {number} config.startHm - Start time in HHMM format (default: 800 = 08:00)
+     * @param {number} config.endHm - End time in HHMM format (default: 2200 = 22:00)
+     * @param {number} config.interval - Time slot interval in minutes (default: 5)
+     * @param {string} config.maxHeight - Maximum height of time slots (default: 'none')
+     * @param {string|Array} config.resources - Resource data or URL to fetch
+     * @param {string|Array} config.events - Event data or URL to fetch
+     * @param {Function} config.eventTemplate - Custom template function for event rendering
+     * @param {Function} config.eventShortTemplate - Custom template for month view events
+     * @param {Function} config.eventClick - Callback when an event is clicked
+     * @param {Object} config.extraParas - Extra parameters for API requests
+     */
     constructor(config = {}) {
         this.selfObj = null;
         this.elementID = config.elementID || 'iwebycalendar';
@@ -19,16 +91,32 @@ class iwebyCalendar {
         this.noResources = false;
         this.eventsURL = config.events || false;
         this.eventTemplate = config.eventTemplate || false;
+        this.eventShortTemplate = config.eventShortTemplate || false;
         this.eventClick = config.eventClick || false;
 
-        this.extraParas = config.extraParas || false;  
+        this.extraParas = config.extraParas || false;
+        
+        // DOM element references
+        this.fixedCorner = null;
+        this.fixedHeader = null;
+        this.fixedLeft = null;
+        this.timeSlots = null;
     }
 
+    /**
+     * Initializes the calendar component
+     * @param {Array} resources - Optional resource data (overrides config)
+     * @param {Array} events - Optional event data (overrides config)
+     * @returns {iwebyCalendar} The instance for chaining
+     */
     init(resources = null, events = null) {
         this.selfObj = document.getElementById(this.elementID);
         if(!this.selfObj) {
+            console.error(`Element with ID "${this.elementID}" not found`);
             return;
         }
+        
+        // Apply base styles
         this.selfObj.style.position = 'relative';
         this.selfObj.style.background = '#fff';
         this.selfObj.style.fontFamily = 'Arial, sans-serif';
@@ -36,6 +124,8 @@ class iwebyCalendar {
         this.selfObj.style.border = '1px solid #e6e6e6';
         this.selfObj.style.boxSizing = 'border-box';
         this.selfObj.style.overflow = 'hidden';
+        
+        // Remove existing child elements
         ['div.fixedCorner', 'div.fixedHeader', 'div.fixedLeft', 'div.timeSlots'].forEach(selector => {
             this.selfObj.querySelectorAll(selector).forEach(el => el.remove());
         });
@@ -45,6 +135,7 @@ class iwebyCalendar {
         this.events = events || this.events;
         this.setupElements();
         
+        // Fetch data if URLs are provided and data not already set
         if(resources === null && this.resourcesURL) {
             this.fetchData(this.resourcesURL, (data) => {
                 this.resources = data;
@@ -65,6 +156,11 @@ class iwebyCalendar {
         return this;
     }
 
+    /**
+     * Refreshes the calendar with new data
+     * @param {Array} resources - New resource data
+     * @param {Array} events - New event data
+     */
     refresh(resources, events) {
         document.getElementById('iwebycalendar-showdate').innerHTML = this.getDisplayDate();
 
@@ -92,6 +188,10 @@ class iwebyCalendar {
         }
     }
 
+    /**
+     * Sets up the calendar DOM elements
+     * @param {boolean} renew - Whether to rebuild from scratch
+     */
     setupElements(renew = false) {
         if(!renew) {
             this.renderControls();
@@ -102,9 +202,14 @@ class iwebyCalendar {
         this.setLeft();
         this.setSlots();
         this.drawEvents(this.events);
-        setTimeout(this.hideLoadingMask, 500);
+        setTimeout(this.hideLoadingMask.bind(this), 500);
     }
 
+    // --- Control Rendering ---
+
+    /**
+     * Renders the control bar with navigation buttons
+     */
     renderControls() {
         const controlsTable = this.createElement('table', {
             width: '100%'
@@ -128,6 +233,10 @@ class iwebyCalendar {
         this.selfObj.appendChild(controlsContainer);
     }
 
+    /**
+     * Creates the left control cell with navigation buttons
+     * @returns {HTMLTableCellElement} The left cell
+     */
     createControlsLeftCell() {
         const cell = this.createElement('td', {
             width: '30%',
@@ -140,6 +249,10 @@ class iwebyCalendar {
         return cell;
     }
 
+    /**
+     * Creates the center control cell with date display
+     * @returns {HTMLTableCellElement} The center cell
+     */
     createControlsCenterCell() {
         const cell = this.createElement('td', {
             fontSize: '16px',
@@ -149,34 +262,33 @@ class iwebyCalendar {
         return cell;
     }
 
+    /**
+     * Creates the right control cell with mode toggle buttons
+     * @returns {HTMLTableCellElement} The right cell
+     */
     createControlsRightCell() {
         const cell = this.createElement('td', {
             width: '30%',
             textAlign: 'right'
         });
-        const modes = [{
-                text: this.lang === 'zh' ? '月' : 'Month',
-                mode: 'month'
-            },
-            {
-                text: this.lang === 'zh' ? '週' : 'Week',
-                mode: 'week'
-            },
-            {
-                text: this.lang === 'zh' ? '日' : 'Day',
-                mode: 'day'
-            }
+        const modes = [
+            { text: this.lang === 'zh' ? '月' : 'Month', mode: 'month' },
+            { text: this.lang === 'zh' ? '週' : 'Week', mode: 'week' },
+            { text: this.lang === 'zh' ? '日' : 'Day', mode: 'day' }
         ];
-        modes.forEach(({
-            text,
-            mode
-        }) => {
+        modes.forEach(({ text, mode }) => {
             const button = this.createControlButton(text, () => this.changeMode(mode));
             cell.appendChild(button);
         });
         return cell;
     }
 
+    /**
+     * Creates a styled control button
+     * @param {string} text - Button text
+     * @param {Function} onClick - Click event handler
+     * @returns {HTMLButtonElement} The button element
+     */
     createControlButton(text, onClick) {
         const button = this.createElement('button', {
             type: 'button',
@@ -191,13 +303,17 @@ class iwebyCalendar {
             boxSizing: 'border-box',
             borderRadius: '4px',
             verticalAlign: 'middle',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            lineHeight: '16px'
         });
         button.textContent = text;
         button.onclick = onClick;
         return button;
     }
     
+    /**
+     * Shows/hides a date picker dialog for jumping to a specific date
+     */
     showTodayDialog() {
         const todaydialogElement = this.selfObj.querySelector('div.todaydialog');
         if(!todaydialogElement) {
@@ -243,6 +359,10 @@ class iwebyCalendar {
         }
     }
 
+    /**
+     * Changes the displayed date by an offset
+     * @param {number} offset - Offset amount (1 = forward, -1 = backward)
+     */
     changeDate(offset) {
         let dateObj = new Date(this.displayDate);
         if(this.displayMode === 'week') {
@@ -259,11 +379,19 @@ class iwebyCalendar {
         this.refresh();
     }
 
+    /**
+     * Changes the display mode
+     * @param {string} mode - 'day', 'week', or 'month'
+     */
     changeMode(mode) {
         this.displayMode = mode;
         this.refresh();
     }
 
+    /**
+     * Gets the formatted display date string
+     * @returns {string} Formatted date string
+     */
     getDisplayDate() {
         if(this.displayMode === 'week') {
             const tempDate = new Date(this.displayDate);
@@ -276,6 +404,11 @@ class iwebyCalendar {
         }
     }
 
+    // --- Body Rendering ---
+
+    /**
+     * Renders the main body structure with fixed header, fixed left, and scrollable slots
+     */
     renderBody() {
         const body = this.createElement('div', {
             position: 'relative',
@@ -284,6 +417,7 @@ class iwebyCalendar {
             overflow: 'hidden'
         }, 'details');
 
+        // Fixed corner (top-left)
         this.fixedCorner = this.createElement('div', {
             position: 'absolute',
             background: '#f6f6f6',
@@ -296,6 +430,7 @@ class iwebyCalendar {
             zIndex: '5'
         }, 'fixedCorner');
 
+        // Fixed header (scrolls horizontally with time slots)
         this.fixedHeader = this.createElement('div', {
             position: 'absolute',
             top: '0px',
@@ -306,6 +441,7 @@ class iwebyCalendar {
             zIndex: '4'
         }, 'fixedHeader');
 
+        // Fixed left column (time labels)
         this.fixedLeft = this.createElement('div', {
             position: 'absolute',
             top: '46px',
@@ -314,6 +450,7 @@ class iwebyCalendar {
             zIndex: '3'
         }, 'fixedLeft');
 
+        // Scrollable time slots
         this.timeSlots = this.createElement('div', {
             position: 'relative',
             background: '#fff',
@@ -328,6 +465,13 @@ class iwebyCalendar {
         this.selfObj.appendChild(body);
     }
 
+    /**
+     * Utility method to create DOM elements with styles
+     * @param {string} tag - HTML tag name
+     * @param {Object} styles - CSS styles
+     * @param {string} className - Optional class name
+     * @returns {HTMLElement} The created element
+     */
     createElement(tag, styles = {}, className) {
         const el = document.createElement(tag);
         if(className) el.className = className;
@@ -335,29 +479,34 @@ class iwebyCalendar {
         return el;
     }
 
+    // --- Header, Left, and Slots Rendering ---
+
+    /**
+     * Sets up the fixed header with resource and date headers
+     */
     setHeader() {
         this.noResources = false;
         if(!this.resources || (this.resources && this.resources.length === 0)) {
-            this.resources = [{
-                id: 0,
-                name: ''
-            }];
+            this.resources = [{ id: 0, name: '' }];
             this.noResources = true;
         }
 
+        // Adjust layout based on display mode
         this.fixedCorner.style.display = ((this.displayMode === 'week' || this.displayMode === 'day')) ? 'block' : 'none';
         this.fixedHeader.style.left = ((this.displayMode === 'week' || this.displayMode === 'day')) ? '61px' : '0px';
         this.fixedHeader.style.overflow = ((this.displayMode === 'week' || this.displayMode === 'day')) ? 'hidden scroll' : 'hidden';
 
         this.fixedHeader.innerHTML = '';
+        
         if(this.displayMode === 'week' || this.displayMode === 'day') {
             const headerTable = this.createElement('table', {
                 width: '100%',
                 borderCollapse: 'collapse'
             });
             const headerRow = this.createElement('tr');
+            
             if(this.resources) {
-                this.resources.forEach((resource, index) => {
+                this.resources.forEach((resource) => {
                     if(this.displayMode === 'week') {
                         const startOfWeek = new Date(this.displayDate);
                         for (let w = 0; w < 7; w++) {
@@ -423,12 +572,16 @@ class iwebyCalendar {
             this.fixedHeader.appendChild(headerTable);
         }
         
+        // Adjust fixed corner height to match header
         const calcHeight = this.selfObj.querySelector('.fixedHeader').offsetHeight;
         this.fixedCorner.style.height = calcHeight+'px';
         this.fixedLeft.style.top = calcHeight+'px';
         this.timeSlots.style.marginTop = calcHeight+'px';
     }
 
+    /**
+     * Sets up the fixed left column with time labels
+     */
     setLeft() {
         this.fixedLeft.style.display = ((this.displayMode === 'week' || this.displayMode === 'day')) ? 'block' : 'none';
         this.fixedLeft.innerHTML = '';
@@ -462,6 +615,9 @@ class iwebyCalendar {
         this.fixedLeft.appendChild(leftTable);
     }
 
+    /**
+     * Sets up the scrollable time slots grid
+     */
     setSlots() {
         this.timeSlots.style.marginLeft = ((this.displayMode === 'week' || this.displayMode === 'day')) ? '61px' : '0px';
         this.timeSlots.style.maxHeight = ((this.displayMode === 'week' || this.displayMode === 'day')) ? (this.maxHeight + 'px') : 'none';
@@ -477,7 +633,7 @@ class iwebyCalendar {
                 let currentTime = this.startHm;
                 while (currentTime <= this.endHm) {
                     const row = this.createElement('tr');
-                    this.resources.forEach((resource, index) => {
+                    this.resources.forEach((resource) => {
                         const startOfWeek = new Date(this.displayDate);
                         if(this.displayMode === 'week') {
                             for (let w = 0; w < 7; w++) {
@@ -519,6 +675,7 @@ class iwebyCalendar {
                 this.timeSlots.appendChild(timeSlotsTable);
             }
         } else {
+            // Month view - render calendar grid
             const targetDate = new Date(this.displayDate);
             const year = targetDate.getFullYear();
             const month = targetDate.getMonth();
@@ -534,6 +691,7 @@ class iwebyCalendar {
 
             let row = this.createElement('tr');
 
+            // Empty cells before the first day of the month
             for (let i = 0; i < startDay; i++) {
                 const cell = this.createElement('td', {
                     position: 'relative',
@@ -547,6 +705,7 @@ class iwebyCalendar {
                 row.appendChild(cell);
             }
 
+            // Day cells
             for (let day = 1; day <= daysInMonth; day++) {
                 const cell = this.createElement('td', {
                     position: 'relative',
@@ -561,12 +720,14 @@ class iwebyCalendar {
                 cell.innerHTML = this.createSvgSquare(day);
                 row.appendChild(cell);
 
+                // Start a new row after Saturday
                 if((day + startDay) % 7 === 0) {
                     timeSlotsTable.appendChild(row);
                     row = this.createElement('tr');
                 }
             }
 
+            // Fill remaining cells in the last row
             if(row.querySelectorAll('td').length > 0 && row.querySelectorAll('td').length < 7) {
                 for (let i = row.querySelectorAll('td').length; i < 7; i++) {
                     const cell = this.createElement('td', {
@@ -587,10 +748,18 @@ class iwebyCalendar {
         }
     }
 
+    /**
+     * Creates an SVG square with day number for month view
+     * @param {number} day - Day of the month
+     * @returns {string} SVG HTML string
+     */
     createSvgSquare(day) {
         return `<svg viewBox="0 0 40 40" preserveAspectRatio="xMidYMid meet" style="position: relative; width: 100%; height: 100%; display: block; cursor: pointer;"><rect x="0" y="0" width="40" height="40" style="fill: #fff;"></rect><text x="32" y="8" alignment-baseline="middle" text-anchor="middle" style="fill: #e6e6e6; font-size: 10px;">${day}</text></svg>`;
     }
 
+    /**
+     * Synchronizes scroll between fixed header/left and time slots
+     */
     syncScroll() {
         this.timeSlots.onscroll = () => {
             this.fixedHeader.querySelector('table').style.transform = `translateX(${-this.timeSlots.scrollLeft}px)`;
@@ -598,8 +767,15 @@ class iwebyCalendar {
         };
     }
 
+    // --- Event Rendering ---
+
+    /**
+     * Draws events on the calendar
+     * @param {Array} events - Array of event objects
+     */
     drawEvents(events) {
         this.events = events || this.events;
+        // Remove existing event elements
         this.timeSlots.querySelectorAll('div.ievent').forEach(event => event.remove());
 
         const formatTime = (time) => {
@@ -610,6 +786,7 @@ class iwebyCalendar {
         };
 
         if(events) {
+            // Sort events by date and start time
             events.sort((a, b) => {
                 if(a.targetDate === b.targetDate) {
                     return a.startHm - b.startHm;
@@ -619,6 +796,7 @@ class iwebyCalendar {
 
             events.forEach(event => {
                 if(this.displayMode === 'week' || this.displayMode === 'day') {
+                    // Find the matching time slot
                     const findMatchSlot = this.timeSlots.querySelector(`[data-timeslot="${(!this.noResources ? event.resourceId : 0)}_${event.targetDate}_${Math.max(this.startHm, event.startHm)}"]`);
                     if(findMatchSlot) {
                         const blockCount = findMatchSlot.querySelectorAll('div.ievent').length;
@@ -627,6 +805,7 @@ class iwebyCalendar {
                         const durationMinutes = endMinutes - startMinutes;
                         const height = (Math.ceil(durationMinutes / this.interval) + 1) * 30;
 
+                        // Create event block
                         const block = this.createElement('div', {
                             position: 'absolute',
                             background: event.background || '#3788d8',
@@ -665,6 +844,7 @@ class iwebyCalendar {
                         findMatchSlot.appendChild(block);
                     }
                 } else {
+                    // Month view - events appear inside day cells
                     const findMatchSlot = this.timeSlots.querySelector(`[data-timeslot="${event.targetDate}"]`);
                     if(findMatchSlot) {
                         const blockCount = findMatchSlot.querySelectorAll('div.ievent').length;
@@ -709,12 +889,25 @@ class iwebyCalendar {
         }
     }
 
+    // --- Date Utility Methods ---
+
+    /**
+     * Gets the previous or next month date
+     * @param {string|Date} date - Current date
+     * @param {number} offset - Month offset
+     * @returns {string} Date string in YYYY-MM-DD format
+     */
     getPrevNextMonth(date, offset) {
         const newDate = new Date(date);
         newDate.setMonth(newDate.getMonth() + offset);
         return newDate.toISOString().split('T')[0];
     }
 
+    /**
+     * Gets the start and end of the month for a given date
+     * @param {string|Date} date - Date to get month boundaries for
+     * @returns {Object} Object with start and end date strings
+     */
     getMonthStartEnd(date) {
         const targetDate = new Date(date);
         const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
@@ -732,6 +925,12 @@ class iwebyCalendar {
         };
     }
 
+    /**
+     * Formats a date to YYYY-MM-DD with optional weekday
+     * @param {string|Date} date - Date to format
+     * @param {string} format - 'month' or 'week' for special formatting
+     * @returns {string} Formatted date string
+     */
     getYmd(date, format) {
         const hongKongDate = new Date(date);
         const formatter = new Intl.DateTimeFormat(((this.lang === 'zh') ? 'zh-HK' : 'en-US'), {
@@ -759,6 +958,12 @@ class iwebyCalendar {
         }
     }
 
+    /**
+     * Calculates the next time slot based on interval
+     * @param {number} hm - Current time in HHMM format
+     * @param {number} interval - Interval in minutes
+     * @returns {number} Next time in HHMM format
+     */
     getNextTimeSlot(hm, interval) {
         let nextHm = hm + interval;
         if(nextHm % 100 >= 60) {
@@ -767,6 +972,13 @@ class iwebyCalendar {
         return nextHm;
     }
 
+    // --- Data Fetching ---
+
+    /**
+     * Fetches data from a URL with extra parameters
+     * @param {string} url - URL to fetch
+     * @param {Function} callback - Callback function with response data
+     */
     async fetchData(url, callback) {
         try {
             let fullUrl = url;
@@ -774,6 +986,8 @@ class iwebyCalendar {
             if(!this.extraParas) {
                 this.extraParas = {};
             }
+            
+            // Add date range parameters based on display mode
             if(this.displayMode === 'month') {
                 const minMaxDate = this.getMonthStartEnd(this.displayDate);
                 this.extraParas['startDate'] = minMaxDate.start;
@@ -805,6 +1019,11 @@ class iwebyCalendar {
         }
     }
 
+    // --- Loading Indicator ---
+
+    /**
+     * Adds spinner animation style if not already present
+     */
     addSpinnerAnimationStyle() {
         let style = document.getElementById('iwebycalendar-spin-animation');
         if(!style) {
@@ -815,6 +1034,9 @@ class iwebyCalendar {
         }
     }
 
+    /**
+     * Shows the loading mask overlay
+     */
     showLoadingMask() {
         this.addSpinnerAnimationStyle();
 
@@ -849,10 +1071,81 @@ class iwebyCalendar {
         }
     }
 
+    /**
+     * Hides the loading mask overlay
+     */
     hideLoadingMask() {
         const loadingMask = document.getElementById('iwebycalendar-loading-mask');
         if(loadingMask) {
             loadingMask.remove();
         }
+    }
+
+    // --- Public API Methods ---
+
+    /**
+     * Gets the current date being displayed
+     * @returns {Date} Current display date
+     */
+    getCurrentDate() {
+        return new Date(this.displayDate);
+    }
+
+    /**
+     * Gets the current display mode
+     * @returns {string} Current mode ('day', 'week', or 'month')
+     */
+    getDisplayMode() {
+        return this.displayMode;
+    }
+
+    /**
+     * Gets all events currently loaded
+     * @returns {Array} Array of events
+     */
+    getEvents() {
+        return this.events;
+    }
+
+    /**
+     * Gets all resources currently loaded
+     * @returns {Array} Array of resources
+     */
+    getResources() {
+        return this.resources;
+    }
+
+    /**
+     * Sets new events and refreshes the calendar
+     * @param {Array} events - New events array
+     */
+    setEvents(events) {
+        this.events = events;
+        this.refresh();
+    }
+
+    /**
+     * Sets new resources and refreshes the calendar
+     * @param {Array} resources - New resources array
+     */
+    setResources(resources) {
+        this.resources = resources;
+        this.refresh();
+    }
+
+    /**
+     * Destroys the calendar and removes DOM elements
+     */
+    destroy() {
+        if(this.selfObj) {
+            this.selfObj.innerHTML = '';
+            this.selfObj.style = '';
+        }
+        this.resources = null;
+        this.events = null;
+        this.fixedCorner = null;
+        this.fixedHeader = null;
+        this.fixedLeft = null;
+        this.timeSlots = null;
     }
 }

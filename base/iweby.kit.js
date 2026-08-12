@@ -1,5 +1,38 @@
+/**
+ * iwebyKit - A comprehensive JavaScript utility library for building web applications
+ * 
+ * This class provides a wide range of functionality including:
+ * - UI component initialization (date picker, time picker, pagination, modals, etc.)
+ * - Form validation and AJAX form submission
+ * - File upload management with progress tracking
+ * - Dialog/alert/confirm/modal management
+ * - Cookie and localStorage handling
+ * - Data validation (email, password, date, time, etc.)
+ * - Utility functions (formatting, random generation, etc.)
+ * 
+ * @example
+ * // Initialize the kit
+ * const iweby = new iwebyKit().init();
+ * 
+ * // Make an AJAX request
+ * iweby.doRequest({
+ *     url: '/api/data',
+ *     payload: { id: 1 }
+ * }, function(response) {
+ *     console.log(response);
+ * });
+ * 
+ * // Show a dialog
+ * iweby.dialog('<p>Custom content</p>', function() {
+ *     console.log('Dialog opened');
+ * });
+ * 
+ * // Use the date picker
+ * iweby.datePicker.render('.date-input');
+ */
 class iwebyKit {
     constructor() {
+        // --- Language Configuration ---
         this.currentLangCode = 'en';
         this.language = {
             en: {
@@ -58,35 +91,49 @@ class iwebyKit {
             }
         };
 
-        this.md5;
-        this.csrfToken;
+        // --- Core Properties ---
+        this.md5;                           // MD5 hash instance for encryption
+        this.csrfToken;                     // CSRF token for request security
         
-        this.timer;
-        this.scrollTimer;
-        this.isBusy = false;
+        this.timer;                         // Timer reference for debouncing
+        this.scrollTimer;                   // Timer for scroll events
+        this.isBusy = false;                // Flag to prevent concurrent requests
 
-        this.datePicker;
-        this.timePicker;
+        // --- Component Instances ---
+        this.datePicker;                    // Date picker instance
+        this.timePicker;                    // Time picker instance
 
-        this.uploaderOptions = {};
-        this.uploaderFiles = {};
-        this.uploaderFilesIgnore = {};
+        // --- Uploader State ---
+        this.uploaderOptions = {};          // Upload configuration options
+        this.uploaderFiles = {};            // Files selected for upload
+        this.uploaderFilesIgnore = {};      // Files to ignore (already uploaded/removed)
 
-        this.viewerWidth = 0;
+        // --- Viewport ---
+        this.viewerWidth = 0;               // Current viewer width for responsive design
         
-        this.eventMap = {};
+        // --- Event System ---
+        this.eventMap = {};                 // Custom event handler registry
     }
 
+    /**
+     * Initializes the iwebyKit framework
+     * Sets up language, CSRF token, event listeners, and initializes components
+     * @returns {iwebyKit} The instance for chaining
+     */
     init() {
         const thisInstance = this;
         
-        // Helper function to safely call if the function is defined
+        // Helper function to safely call window functions if they exist
         const safeCallFunc = (func, args) => {
             if ((typeof window[func]) === 'function') {
                 window[func](args);
             }
         };
         
+        /**
+         * Sets the view mode based on screen width
+         * @param {number} width - Current viewport width
+         */
         const setViewMode = (width) => {
             const BREAKPOINTS = {
                 DESKTOP: 900,
@@ -111,19 +158,19 @@ class iwebyKit {
             }
         };
         
-        // Call optional layout and extra functions if they are defined
+        // --- DOM Content Loaded ---
         document.addEventListener('DOMContentLoaded', function() {
-            // Set current language
+            // Set current language from HTML lang attribute
             const defaultLang = document.documentElement.lang;
             const htmlLang = (defaultLang ? defaultLang.toLowerCase().replace('-', '_') : 'en');
             if (thisInstance.isValue(htmlLang) && thisInstance.isValue(thisInstance.language[htmlLang])) {
                 thisInstance.currentLangCode = htmlLang;
             }
             
-            // md5 encrypt
+            // Initialize MD5 encryption
             thisInstance.md5 = (new iMD5());
 
-            // Set CSRF token
+            // Set CSRF token from meta tag
             const metaToken = document.querySelector('meta[name="csrf-token"]');
             const csrfTokenContent = metaToken ? metaToken.content : '';
             if (thisInstance.isValue(csrfTokenContent)) {
@@ -131,22 +178,21 @@ class iwebyKit {
                 thisInstance.csrfToken = thisInstance.md5.hash(thisInstance.md5.hash('iweby@' + hostname) + '@' + csrfTokenContent);
             }
 
-            // Init body & component
+            // Initialize body and components
             thisInstance.initBody();
             thisInstance.initComponent();
             
-            // Set iweby-viewer width
+            // Get viewer width
             if(document.querySelector('div.iweby-viewer')) {
                 thisInstance.viewerWidth = parseInt(document.querySelector('div.iweby-viewer').offsetWidth);
             }
 
-            // Call function
+            // Execute layout and function callbacks after DOM is ready
             setTimeout(function() {
-                document.body.style.setProperty('--iscrollbar-width', (window.innerWidth - thisInstance.viewerWidth + 'px')),
+                document.body.style.setProperty('--iscrollbar-width', (window.innerWidth - thisInstance.viewerWidth + 'px'));
                 
                 setViewMode(thisInstance.viewerWidth);
                 
-                //console.log('DOM done');
                 thisInstance.responsive();
                 thisInstance.responsiveTable();
                 
@@ -164,10 +210,9 @@ class iwebyKit {
             }, 100);
         });
 
-        // Page load completed
+        // --- Window Load Complete ---
         window.onload = function() {
             setTimeout(function() {
-                //console.log('window done');
                 safeCallFunc('iwebyCommonLayoutEnd', thisInstance.viewerWidth);
                 safeCallFunc('iwebyLayoutEnd', thisInstance.viewerWidth);
                 safeCallFunc('iwebyChildLayoutEnd', thisInstance.viewerWidth);
@@ -180,11 +225,10 @@ class iwebyKit {
             }, 100);
         };
 
-        // Page resize
+        // --- Window Resize ---
         window.addEventListener('resize', function() {
             clearTimeout(thisInstance.timer);
             thisInstance.timer = setTimeout(() => {
-                //console.log('window resize');
                 if (thisInstance.viewerWidth !== parseInt(document.querySelector('div.iweby-viewer').offsetWidth)) {
                     thisInstance.viewerWidth = parseInt(document.querySelector('div.iweby-viewer').offsetWidth);
 
@@ -201,11 +245,10 @@ class iwebyKit {
             }, 100);
         });
 
-        // Page scroll
+        // --- Window Scroll ---
         window.addEventListener('scroll', function() {
             clearTimeout(thisInstance.scrollTimer);
             thisInstance.scrollTimer = setTimeout(() => {
-                //console.log('window scroll');
                 safeCallFunc('iwebyCommonScroll', window.scrollY);
                 safeCallFunc('iwebyScroll', window.scrollY);
                 safeCallFunc('iwebyChildScroll', window.scrollY);
@@ -216,13 +259,16 @@ class iwebyKit {
         return thisInstance;
     }
 
+    /**
+     * Initializes the body structure: adds core class, wraps content in viewer container
+     */
     initBody() {
         const thisInstance = this;
 
         // Add core class to body
         document.body.classList.add('iweby');
 
-        // Wrap elements except for <script>, <noscript>, and <style>
+        // Wrap all elements except script, noscript, and style in iweby-viewer container
         const wrapper = document.createElement('div');
         wrapper.classList.add('iweby-viewer');
         const bodyChildren = Array.from(document.body.childNodes);
@@ -240,14 +286,17 @@ class iwebyKit {
             document.body.prepend(wrapper);
         }
 
-        // Handle click
+        // --- Document Click Handler ---
         document.addEventListener('click', function(e) {
             const target = e.target;
 
-            // Handle anchor click
+            // Handle anchor clicks
             if (target.closest('a')) {
                 const href = target.closest('a').getAttribute('href');
-                if (!thisInstance.isValue(href) || thisInstance.isMatch(href, '#') || thisInstance.isMatch(href, 'javascript:void(0);')  || thisInstance.isMatch(href, 'javascript:void(0)')) {
+                if (!thisInstance.isValue(href) || 
+                    thisInstance.isMatch(href, '#') || 
+                    thisInstance.isMatch(href, 'javascript:void(0);')  || 
+                    thisInstance.isMatch(href, 'javascript:void(0)')) {
                     e.preventDefault();
                     
                     // Hide tips message
@@ -257,7 +306,7 @@ class iwebyKit {
                         target.closest('div.iweby-tips-message').innerHTML = '';
                     } 
                     
-                    // Reset autocomplete's input
+                    // Reset autocomplete input
                     else if (target.closest('a.fill-reset')) {
                         const fillID = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-id');
                         const fillText = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-text');
@@ -287,7 +336,7 @@ class iwebyKit {
                         }
                     }
                     
-                    // Show or hide expand area
+                    // Toggle expand area visibility
                     else if (target.closest('a.control-stretch') && target.closest('div.widget.expand')) {
                         if (target.closest('div.widget.expand').classList.contains('show')) {
                             target.closest('div.widget.expand').classList.remove('show');
@@ -299,7 +348,7 @@ class iwebyKit {
                 }
             }
 
-            // Switch password input display mode
+            // Toggle password visibility
             if (target.closest('button.switch-pwd-type')) {
                 const InputPwd = target.closest('div.iweby-input').querySelector('input');
                 const ShowIconPwd = target.closest('div.iweby-input').querySelector('i.show');
@@ -316,14 +365,14 @@ class iwebyKit {
                 }
             }
 
-            // Hide autocomplete options
+            // Hide autocomplete options when clicking outside
             if (!target.closest('div.iweby-input-autocomplete')) {
                 document.querySelectorAll('div.iweby-input-autocomplete ul.fill-options').forEach(function(e1) {
                     e1.remove();
                 });
             }
 
-            // Show or hide select options
+            // Toggle select options visibility
             if (!target.closest('div.iweby-select')) {
                 document.querySelectorAll('div.iweby-select').forEach(function(e1) {
                     e1.classList.remove('show');
@@ -341,6 +390,7 @@ class iwebyKit {
                         }
                     }
                     
+                    // Close other select dropdowns
                     document.querySelectorAll('div.iweby-select').forEach(function(otherSelector) {
                         const otherOptions = otherSelector.querySelector('div.virtual > div.options > ul');
                         if (otherOptions) {
@@ -350,6 +400,7 @@ class iwebyKit {
                         }
                     });
 
+                    // Handle option selection
                     if (target.closest('a') && target.closest('li.node')) {
                         const isMultiple = target.closest('div.iweby-select').classList.contains('iweby-select-multiple');
                         const selectElement = target.closest('div.iweby-select').querySelector('div.real > select');
@@ -413,9 +464,10 @@ class iwebyKit {
             }
         });
 
-        // Handle input
+        // --- Document Input Handler ---
         document.addEventListener('input', function(e) {
             const target = e.target;
+            // Remove error state on input
             if (target.closest('div.iweby-input')) {
                 target.closest('div.iweby-input').classList.remove('error');
                 const oriSmallTips = target.closest('div.iweby-input').querySelector('small.tips');
@@ -424,7 +476,7 @@ class iwebyKit {
                 }
             }
 
-            // Color code
+            // Color code synchronization
             if (target.closest('div.iweby-input-color')) {
                 if (thisInstance.isMatch(target.type, 'color')) {
                     const inputColorCode = target.closest('div.iweby-input-color').querySelector('input[type="text"]');
@@ -443,7 +495,7 @@ class iwebyKit {
                 }
             }
             
-            // Autocomplete
+            // Autocomplete search
             else if (target.closest('div.iweby-input-autocomplete') && target.closest('input.fill-text')) {
                 clearTimeout(thisInstance.timer);
                 thisInstance.timer = setTimeout(() => {
@@ -468,7 +520,7 @@ class iwebyKit {
                         }
                     }
 
-                    // Merge post data
+                    // Prepare request
                     const keywords = target.value;
                     const url = target.closest('div.iweby-input-autocomplete').querySelector('input.fill-id').getAttribute('data-url');
                     const requestData = {
@@ -479,7 +531,7 @@ class iwebyKit {
                         showBusy: false
                     };
 
-                    // Search result handling
+                    // Search and display results
                     if (thisInstance.isValue(keywords)) {
                         thisInstance.doRequest(requestData, function(responseData) {
                             if (thisInstance.isValue(responseData)) {
@@ -563,7 +615,7 @@ class iwebyKit {
                 }, 1000);
             } 
             
-            // Select search options
+            // Select search filter
             else if (target.closest('div.iweby-select') && target.closest('li.filter')) {
                 const fkw = target.value;
                 
@@ -593,11 +645,11 @@ class iwebyKit {
             }
         });
 
-        // Handle change
+        // --- Document Change Handler ---
         document.addEventListener('change', function(e) {
             const target = e.target;
                 
-            // Select
+            // Virtual select synchronization
             if (target.closest('div.iweby-select')) {
                 let selectedOptions = [];
                 let selectedOptionLabel = '';
@@ -653,7 +705,7 @@ class iwebyKit {
                 }
             } 
             
-            // File
+            // File input preview
             else if (target.closest('div.iweby-input-file') && !target.closest('div.iweby-files-dropzone')) {
                 const filePreviewArea = target.closest('div.iweby-input-file').querySelector('div.preview');
                 if(filePreviewArea) {
@@ -696,7 +748,7 @@ class iwebyKit {
                 }
             }
             
-            // Checkbox
+            // Checkbox synchronization
             else if (target.closest('div.iweby-checkbox')) {
                 const relatedObject = document.querySelectorAll('input[type="checkbox"][name="' + (target.name) + '"]');
                 relatedObject.forEach(function(relatedCheckbox) {
@@ -716,7 +768,7 @@ class iwebyKit {
                 }
             } 
             
-            // Radio
+            // Radio synchronization
             else if (target.closest('div.iweby-radio')) {
                 const selectedValue = target.value;
                 const relatedObject = document.querySelectorAll('input[type="radio"][name="' + (target.name) + '"]');
@@ -742,7 +794,7 @@ class iwebyKit {
             }
         });
 
-        // Init default font size
+        // --- Font Size Initialization ---
         const fontSizeClasses = ['small-font', 'middle-font', 'large-font'];
         const defaultFontSize = (thisInstance.getCookie('iweb_font_size'));
         const fontButtons = document.querySelectorAll('a.font-switch');
@@ -755,6 +807,9 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Initializes all UI components: inputs, selects, checkboxes, radios, iframes, videos, tables, forms
+     */
     initComponent() {
         const thisInstance = this;
         
@@ -769,7 +824,7 @@ class iwebyKit {
             thisInstance.responsive();
         }, 500);
         
-        // set flex gap
+        // Set flex gap
         const uls = document.querySelectorAll('ul.iweby-flex');
         if(uls.length > 0) {
             uls.forEach(ul => {
@@ -784,7 +839,7 @@ class iwebyKit {
             });
         }
 
-        // insert div before & after into editor div
+        // Insert clear div before & after into editor div
         const editors = document.querySelectorAll('div.iweby-editor');
         if(editors.length > 0) {
             editors.forEach(editor => {
@@ -802,7 +857,7 @@ class iwebyKit {
             });
         }
         
-        // init responsive table
+        // Initialize responsive table
         const rtable = document.querySelectorAll('table.iweby-table');
         if(rtable.length > 0) {
             rtable.forEach(function(table) {
@@ -816,10 +871,15 @@ class iwebyKit {
             });
         }
         
-        // Init form
+        // Initialize forms
         thisInstance.initForm();
     }
 
+    /**
+     * Beautifies input elements and initializes date/time pickers
+     * @param {NodeList|string} inputObject - Input elements or selector
+     * @param {Function} callBack - Callback function after initialization
+     */
     inputBox(inputObject, callBack) {
         const thisInstance = this;
 
@@ -953,13 +1013,13 @@ class iwebyKit {
             });
         }
 
-        // Init date picker
+        // Initialize date picker
         if (!thisInstance.isValue(thisInstance.datePicker)) {
             thisInstance.datePicker = new iDatePicker(thisInstance.currentLangCode);
         }
         thisInstance.datePicker.render('input[type="date"]');
 
-        // Init time picker
+        // Initialize time picker
         if (!thisInstance.isValue(thisInstance.timePicker)) {
             thisInstance.timePicker = new iTimePicker();
         }
@@ -971,6 +1031,11 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Beautifies select elements with virtual dropdown
+     * @param {NodeList|string} selectObject - Select elements or selector
+     * @param {Function} callBack - Callback function after initialization
+     */
     selectBox(selectObject, callBack) {
         const thisInstance = this;
 
@@ -1135,6 +1200,11 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Beautifies checkbox elements
+     * @param {NodeList|string} checkboxObject - Checkbox elements or selector
+     * @param {Function} callBack - Callback function after initialization
+     */
     checkBox(checkboxObject, callBack) {
         const thisInstance = this;
 
@@ -1172,6 +1242,12 @@ class iwebyKit {
         }
     }
     
+    /**
+     * Sets checkbox checked state programmatically
+     * @param {Element|NodeList} checkboxObject - Checkbox element(s)
+     * @param {boolean} isChecked - Whether to check or uncheck
+     * @param {Function} callBack - Callback function
+     */
     setCheckBox(checkboxObject, isChecked = false, callBack) {
         const thisInstance = this;
         
@@ -1204,6 +1280,11 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Beautifies radio button elements
+     * @param {NodeList|string} radioObject - Radio elements or selector
+     * @param {Function} callBack - Callback function after initialization
+     */
     radioBox(radioObject, callBack) {
         const thisInstance = this;
 
@@ -1241,6 +1322,12 @@ class iwebyKit {
         }
     }
     
+    /**
+     * Sets radio button checked state programmatically
+     * @param {Element|NodeList} radioObject - Radio element(s)
+     * @param {boolean} isChecked - Whether to check or uncheck
+     * @param {Function} callBack - Callback function
+     */
     setRadioBox(radioObject, isChecked = false, callBack) {
         const thisInstance = this;
         
@@ -1272,7 +1359,39 @@ class iwebyKit {
             callBack();
         }
     }
-
+    
+    /**
+     * Adds required field indicators (*) to labels
+     */
+    setLabelDot() {
+        document.querySelectorAll('input[data-validation], select[data-validation], textarea[data-validation]').forEach(input => {
+            const validation = input.getAttribute('data-validation');
+            let id = (input.id || input.name);
+            if (id) {
+                if(input.classList.contains('fill-text')) {
+                   id = id.replace(/_txt$/, '');
+                }
+                const label = document.querySelector(`label[for="${id}"]`);
+                if (validation.includes('required')) {
+                    if (label && !label.innerHTML.includes('*')) {
+                        label.innerHTML += ' <small class="required-red-dot">*</small>';
+                    }
+                }
+                else {
+                    if (label && label.innerHTML.includes('*')) {
+                        const starRegex = /\s*<small class="required-reddot">\*<\/small>/;
+                        label.innerHTML = label.innerHTML.replace(starRegex, '').trim();
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Makes iframes, videos, objects, and embeds responsive
+     * @param {string} element - Parent element selector
+     * @param {Function} callBack - Callback function
+     */
     iframe(element = 'div.iweby-editor', callBack) {
         const thisInstance = this;
 
@@ -1303,6 +1422,10 @@ class iwebyKit {
         }
     }
     
+    /**
+     * Creates custom video player with controls
+     * @param {Function} callBack - Callback function
+     */
     video(callBack) {
         const thisInstance = this;
         
@@ -1489,6 +1612,9 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Makes elements responsive by maintaining aspect ratio
+     */
     responsive() {
         const thisInstance = this;
         const responsiveElements = document.querySelectorAll('div.iweby-responsive');
@@ -1515,6 +1641,9 @@ class iwebyKit {
         }
     }
     
+    /**
+     * Makes tables responsive with vertical labels on small screens
+     */
     responsiveTable() {
         const thisInstance = this;
         const rtable = document.querySelectorAll('table.iweby-table');
@@ -1573,6 +1702,10 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Initializes pagination on selected elements
+     * @param {string} element - Selector for pagination containers
+     */
     pagination(element) {
         document.querySelectorAll(element).forEach(function(e) {
             new iPagination(e, {
@@ -1584,12 +1717,25 @@ class iwebyKit {
         });
     }
 
-    // Request, default once by once
+    /**
+     * Alias for doRequest with POST method
+     * @param {Object} requestData - Request configuration
+     * @param {Function} callBack - Success callback
+     * @param {Function} finalCallBack - Final callback
+     * @param {Function} progressCallBack - Progress callback
+     */
     doPost(requestData, callBack, finalCallBack, progressCallBack) {
         const thisInstance = this;
         thisInstance.doRequest(requestData, callBack, finalCallBack, progressCallBack);
     }
     
+    /**
+     * Alias for doRequest with GET method
+     * @param {Object} requestData - Request configuration
+     * @param {Function} callBack - Success callback
+     * @param {Function} finalCallBack - Final callback
+     * @param {Function} progressCallBack - Progress callback
+     */
     doFetch(requestData, callBack, finalCallBack, progressCallBack) {
         const thisInstance = this;
         
@@ -1601,10 +1747,26 @@ class iwebyKit {
         thisInstance.doRequest(requestData, callBack, finalCallBack, progressCallBack);
     }
 
+    /**
+     * Core AJAX request handler with progress tracking
+     * @param {Object} requestData - Request configuration
+     * @param {string} requestData.method - HTTP method (GET, POST)
+     * @param {string} requestData.url - Request URL
+     * @param {Object} requestData.payload - Request payload data
+     * @param {boolean} requestData.includedToken - Whether to include CSRF token
+     * @param {string} requestData.dataType - Response data type (json, blob)
+     * @param {boolean|number} requestData.showBusy - Show loading indicator
+     * @param {boolean} requestData.multiThread - Allow concurrent requests
+     * @param {string} requestData.bearerToken - Bearer token for authentication
+     * @param {string} requestData.xAuthToken - Custom auth token header
+     * @param {Function} callBack - Success callback
+     * @param {Function} finalCallBack - Final callback after completion
+     * @param {Function} progressCallBack - Upload progress callback
+     */
     doRequest(requestData, callBack, finalCallBack, progressCallBack) {
         const thisInstance = this;
 
-        // Merge request data
+        // Merge request data with defaults
         requestData = Object.assign({
             method: 'POST',
             url: '',
@@ -1659,23 +1821,7 @@ class iwebyKit {
                     formData.append('itoken', window.btoa(thisInstance.md5.hash(thisInstance.csrfToken + '#dt' + localTime) + '%' + localTime));
                 }
                 
-                // Append payload
-                /*if (requestData.payload) {
-                    for (let key in (requestData.payload)) {
-                        if ((requestData.payload).hasOwnProperty(key)) {
-                            const value = requestData.payload[key];
-                            // Check if the value is an object or array and stringify it
-                            if (typeof value === 'object' && !(value instanceof File || value instanceof FileList)) {
-                                for (let subKey in value) {
-                                    formData.append((key + '[' + subKey + ']'), value[subKey]);
-                                }
-                            } 
-                            else {
-                                formData.append(key, value);
-                            }
-                        }
-                    }
-                }*/
+                // Append payload recursively (supports nested objects)
                 const appendFormData = (formData, data, parentKey = '') => {
                     if (data && typeof data === 'object' && !(data instanceof File)) {
                         Object.keys(data).forEach(key => {
@@ -1697,7 +1843,7 @@ class iwebyKit {
                     thisInstance.showBusy(false);
                 }
 
-                // Final Callbacked
+                // Final Callback
                 if ((typeof finalCallBack) === 'function') {
                     finalCallBack();
                 }
@@ -1731,7 +1877,7 @@ class iwebyKit {
                 xhr.upload.onprogress = function(event) {
                     if (event.lengthComputable) {
                         const percentComplete = Math.ceil((event.loaded / event.total) * 100);
-                        // Progress Callbacked
+                        // Progress Callback
                         if ((typeof progressCallBack) === 'function') {
                             progressCallBack(percentComplete);
                         }
@@ -1755,7 +1901,7 @@ class iwebyKit {
                                 break;
                         }
 
-                        // Callbacked
+                        // Callback
                         if ((typeof callBack) === 'function') {
                             callBack(responseData);
                         }
@@ -1802,6 +1948,10 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Initializes AJAX forms with validation and submission handling
+     * @param {NodeList|string} formObject - Form elements or selector
+     */
     initForm(formObject) {
         const thisInstance = this;
 
@@ -2177,6 +2327,15 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Opens file uploader dialog with preview and batch upload support
+     * @param {Object} options - Upload configuration
+     * @param {string} options.url - Upload endpoint URL
+     * @param {number} options.maxFiles - Maximum number of files (default: 8)
+     * @param {string} options.allowedTypes - Pipe-separated allowed file extensions
+     * @param {number} options.maxFileSize - Maximum file size in MB
+     * @param {Function} callBack - Callback after upload completes
+     */
     uploader(options, callBack) {
         const thisInstance = this;
 
@@ -2188,7 +2347,7 @@ class iwebyKit {
             const fileInput = this;
             const target = e.target;
 
-            // Max 8 files
+            // Max files limit
             const maxFiles = Math.max(1, (thisInstance.isValue(options) && thisInstance.isValue(options.maxFiles))?parseInt(options.maxFiles):8);
             let selectedFiles = fileInput.files;
             if (selectedFiles.length > maxFiles) {
@@ -2306,6 +2465,12 @@ class iwebyKit {
         fileInput.click();
     }
 
+    /**
+     * Sets up drag-and-drop file upload area
+     * @param {string} fileInputID - ID of the file input element
+     * @param {Object} options - Upload configuration
+     * @param {Function} callBack - Callback after upload completes
+     */
     uploaderArea(fileInputID, options, callBack) {
         const thisInstance = this;
 
@@ -2434,6 +2599,12 @@ class iwebyKit {
         parent.appendChild(uploaderDiv);
     }
 
+    /**
+     * Renders file preview items in the uploader
+     * @param {FileList} selectingFiles - Files to preview
+     * @param {number} key - Current file index
+     * @param {string} fileInputID - Optional file input ID for inline uploaders
+     */
     uploaderPreview(selectingFiles, key = 0, fileInputID) {
         const thisInstance = this;
         const regex = /^(.*)(.jpg|.jpeg|.gif|.png|.bmp)$/;
@@ -2554,6 +2725,13 @@ class iwebyKit {
         thisInstance.uploaderPreview(selectingFiles, key + 1, fileInputID);
     }
 
+    /**
+     * Starts file upload for selected files with progress tracking
+     * @param {number} index - Current file index
+     * @param {Array} loopUploadIndex - Array of file indices to upload
+     * @param {number} lastUploadIndex - Last index in the upload queue
+     * @param {string} fileInputID - Optional file input ID for inline uploaders
+     */
     uploaderStart(index, loopUploadIndex, lastUploadIndex, fileInputID) {
         const thisInstance = this;
 
@@ -2719,7 +2897,12 @@ class iwebyKit {
         }
     }
 
-    // dialog
+    /**
+     * Shows an alert dialog with a message
+     * @param {string} message - Message to display
+     * @param {Function} callBack - Callback after dialog closes
+     * @param {string} customizeClassName - Optional custom CSS class
+     */
     alert(message, callBack, customizeClassName) {
         // Prevent duplicate dialogs
         if (document.querySelectorAll('div.iweby-alert-dialog').length > 0) {
@@ -2794,6 +2977,12 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Shows a confirmation dialog with Yes/No buttons
+     * @param {string} message - Message to display
+     * @param {Function} callBack - Callback with boolean result (true=Yes, false=No)
+     * @param {string} customizeClassName - Optional custom CSS class
+     */
     confirm(message, callBack, customizeClassName) {
         // Prevent duplicate dialogs
         if (document.querySelectorAll('div.iweby-alert-dialog').length > 0) {
@@ -2892,6 +3081,13 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Shows a custom dialog with HTML content
+     * @param {string|HTMLElement} htmlContent - HTML content to display
+     * @param {Function} initFunc - Callback when dialog opens
+     * @param {Function} callBack - Callback when dialog closes
+     * @param {string} customizeClassName - Optional custom CSS class
+     */
     dialog(htmlContent, initFunc, callBack, customizeClassName) {
         // Prevent duplicate dialogs
         if (document.querySelector('div.iweby-info-dialog')) {
@@ -2972,6 +3168,16 @@ class iwebyKit {
         }
     }
     
+    /**
+     * Creates a draggable/resizable modal dialog
+     * @param {string} htmlContent - HTML content to display
+     * @param {Function} initFunc - Callback when dialog opens
+     * @param {Object} options - Modal configuration options
+     * @param {string} options.title - Dialog title
+     * @param {string} options.ClassName - Custom CSS class
+     * @param {number} options.width - Dialog width in pixels
+     * @param {number} options.height - Dialog height in pixels
+     */
     modalDialog(htmlContent, initFunc, options) {
         const thisInstance = this;
         if(thisInstance.isValue(htmlContent)) {
@@ -2989,6 +3195,12 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Shows a tips message (success/error) in the tips area
+     * @param {string} message - Message to display
+     * @param {boolean} isSuccess - Whether it's a success message
+     * @param {Function} callBack - Callback after message is shown
+     */
     tipsMsg(message, isSuccess = false, callBack) {
         const thisInstance = this;
         
@@ -3035,7 +3247,14 @@ class iwebyKit {
         }
     }
 
-    // bind event
+    // --- Event System ---
+
+    /**
+     * Binds a custom event to elements matching a selector
+     * @param {string} eventType - Event type (click, change, etc.)
+     * @param {string} selector - CSS selector for target elements
+     * @param {Function} callBack - Callback function receiving (target, event)
+     */
     bindEvent(eventType, selector, callBack) {
         const thisInstance = this;
 
@@ -3063,6 +3282,11 @@ class iwebyKit {
         });
     }
 
+    /**
+     * Unbinds a custom event for a specific selector
+     * @param {string} eventType - Event type
+     * @param {string} selector - CSS selector
+     */
     unBindEvent(eventType, selector) {
         if (this.eventMap[eventType]) {
             // Filter out the event listener that matches the selector
@@ -3075,6 +3299,11 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Triggers a custom event on elements matching a selector
+     * @param {string} eventType - Event type to trigger
+     * @param {string} selector - CSS selector
+     */
     triggerEvent(eventType, selector) {
         const target = document.querySelector(selector);
         if (target) {
@@ -3087,7 +3316,13 @@ class iwebyKit {
         }
     }
 
-    // validation
+    // --- Validation Methods ---
+
+    /**
+     * Checks if a value is defined and non-empty
+     * @param {*} value - Value to check
+     * @returns {boolean} True if value is defined and non-empty
+     */
     isValue(value) {
         if ((typeof value) === 'undefined' || value === null) {
             return false;
@@ -3102,6 +3337,13 @@ class iwebyKit {
         return value.toString().trim() !== '';
     }
 
+    /**
+     * Case-insensitive comparison of two values
+     * @param {*} value1 - First value
+     * @param {*} value2 - Second value
+     * @param {boolean} sensitive - Case-sensitive comparison
+     * @returns {boolean} True if values match
+     */
     isMatch(value1, value2, sensitive = false) {
         const thisInstance = this;
 
@@ -3114,6 +3356,12 @@ class iwebyKit {
         return false;
     }
 
+    /**
+     * Validates if a value is a number
+     * @param {*} value - Value to check
+     * @param {boolean} digitalMode - Strict digit-only mode
+     * @returns {boolean} True if value is a number
+     */
     isNumber(value, digitalMode = false) {
         const thisInstance = this;
         const reg = ((digitalMode) ? /^[0-9]+$/ : /(^((-)?[1-9]{1}\d{0,2}|0\.|0$))(((\d)+)?)(((\.)(\d+))?)$/);
@@ -3125,6 +3373,11 @@ class iwebyKit {
         return false;
     }
 
+    /**
+     * Validates email address format
+     * @param {string} value - Email to validate
+     * @returns {boolean} True if valid email
+     */
     isEmail(value) {
         const thisInstance = this;
         const reg = /^([A-Za-z0-9_\-\.])+@([A-Za-z0-9_\-\.])+\.[A-Za-z]{2,}$/;
@@ -3136,6 +3389,11 @@ class iwebyKit {
         return false;
     }
 
+    /**
+     * Validates password strength (min 6 chars, uppercase, lowercase, number)
+     * @param {string} value - Password to validate
+     * @returns {boolean} True if password meets criteria
+     */
     isPassword(value) {
         const thisInstance = this;
         const reg = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
@@ -3147,6 +3405,12 @@ class iwebyKit {
         return false;
     }
 
+    /**
+     * Validates date format and validity
+     * @param {string} value - Date string to validate
+     * @param {string} format - Expected date format (Y-m-d or d/m/Y)
+     * @returns {boolean} True if valid date
+     */
     isDate(value, format = 'Y-m-d') {
         const thisInstance = this;
         const reg = /^(\d{4})(\-)(\d{2})(\-)(\d{2})$/;
@@ -3189,6 +3453,11 @@ class iwebyKit {
         return false;
     }
 
+    /**
+     * Validates time format (HH:MM)
+     * @param {string} value - Time string to validate
+     * @returns {boolean} True if valid time
+     */
     isTime(value) {
         const thisInstance = this;
         const reg = /^(\d{2}):(\d{2})$/;
@@ -3204,23 +3473,34 @@ class iwebyKit {
         return false;
     }
 
-    // convert
+    // --- Conversion Methods ---
+
+    /**
+     * Converts bytes to human-readable format
+     * @param {number} bytes - Bytes to convert
+     * @param {number} decimals - Decimal places
+     * @returns {string} Formatted string
+     */
     formatBytes(bytes, decimals) {
-        // Return '0 Bytes' if bytes is falsy (0, null, undefined, etc.)
         if (!bytes) return '0 Bytes';
 
-        const k = 1024; // Base of the byte conversion
-        const dm = (decimals < 0) ? 0 : decimals; // Determine decimal places
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']; // Size units
+        const k = 1024;
+        const dm = (decimals < 0) ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-        // Calculate the index for the size
         const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-        // Format the bytes and append the appropriate size unit
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     };
     
-    
+    /**
+     * Formats numbers with thousand separators and decimal places
+     * @param {number|string} value - Number to format
+     * @param {boolean} currencyMode - Add thousand separators
+     * @param {number} decimal - Decimal places
+     * @param {boolean} autoBeautify - Remove trailing zeros
+     * @returns {string} Formatted number
+     */
     formatNumber(value, currencyMode, decimal = 2, autoBeautify = true) {
         const thisInstance = this;
 
@@ -3255,6 +3535,12 @@ class iwebyKit {
         return 0;
     }
 
+    /**
+     * Formats date/time to various formats
+     * @param {Date|string} value - Date value
+     * @param {string} format - Output format
+     * @returns {string} Formatted date/time
+     */
     formatDateTime(value, format = 'Y-m-d H:i:s') {
         const thisInstance = this;
 
@@ -3329,6 +3615,11 @@ class iwebyKit {
         return dateTime;
     }
     
+    /**
+     * Formats seconds to HH:MM:SS or MM:SS
+     * @param {number} seconds - Seconds to format
+     * @returns {string} Formatted time string
+     */
     formatTime(seconds = 0) {
         const hrs = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
@@ -3336,7 +3627,14 @@ class iwebyKit {
         return (hrs > 0) ? (hrs.toString().padStart(2, '0') + ':' + mins + ':' + secs) : (mins + ':' + secs);
     }
 
-    // cookie
+    // --- Cookie Management ---
+
+    /**
+     * Sets a cookie
+     * @param {string} key - Cookie name
+     * @param {string} value - Cookie value
+     * @param {number} exdays - Expiration in days
+     */
     setCookie(key, value, exdays = 14) {
         const thisInstance = this;
 
@@ -3355,6 +3653,11 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Gets a cookie value
+     * @param {string} key - Cookie name
+     * @returns {string} Cookie value or empty string
+     */
     getCookie(key) {
         const thisInstance = this;
 
@@ -3376,12 +3679,22 @@ class iwebyKit {
         return '';
     }
 
+    /**
+     * Deletes a cookie
+     * @param {string} key - Cookie name
+     */
     deleteCookie(key) {
         const thisInstance = this;
         thisInstance.setCookie(key, '', -1);
     }
 
-    // local storage
+    // --- Local Storage Management ---
+
+    /**
+     * Sets a value in localStorage with type preservation
+     * @param {string} key - Storage key
+     * @param {*} value - Value to store
+     */
     setLocalStorage(key, value) {
         const thisInstance = this;
         try {
@@ -3395,6 +3708,12 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Gets a value from localStorage with type restoration
+     * @param {string} key - Storage key
+     * @param {*} defaultValue - Default value if not found
+     * @returns {*} Retrieved value
+     */
     getLocalStorage(key, defaultValue = null) {
         const thisInstance = this;
         try {
@@ -3409,6 +3728,10 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Deletes a localStorage item
+     * @param {string} key - Storage key (if empty, clears all)
+     */
     deleteLocalStorage(key) {
         if(key) {
             localStorage.removeItem(key);
@@ -3418,6 +3741,11 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Determines the type of a value for serialization
+     * @param {*} value - Value to check
+     * @returns {string} Type string
+     */
     typeOfValue(value) {
         if (value === null) return 'null';
         if (value === undefined) return 'undefined';
@@ -3428,6 +3756,11 @@ class iwebyKit {
         return typeof value;
     }
 
+    /**
+     * Serializes a value for storage
+     * @param {*} value - Value to serialize
+     * @returns {*} Serialized value
+     */
     serializeValue(value) {
         if (value === undefined) return null;
         if (value instanceof Date) return value.toISOString();
@@ -3436,6 +3769,12 @@ class iwebyKit {
         return value;
     }
 
+    /**
+     * Deserializes a value from storage
+     * @param {string} type - Data type
+     * @param {*} value - Serialized value
+     * @returns {*} Deserialized value
+     */
     deserializeValue(type, value) {
         switch (type) {
             case 'date': return new Date(value);
@@ -3446,7 +3785,15 @@ class iwebyKit {
         }
     }
 
-    // others
+    // --- Utility Methods ---
+
+    /**
+     * Debounces a function call
+     * @param {Function} callBack - Function to debounce
+     * @param {number} delay - Delay in milliseconds
+     * @param {boolean} prevent - Prevent default behavior
+     * @returns {Function} Debounced function
+     */
     deBounce(callBack, delay = 100, prevent = true) {
         let timeout;
         return function(e) {
@@ -3457,18 +3804,23 @@ class iwebyKit {
                 }
             }
 
-            //Clear the previous timer
+            // Clear the previous timer
             clearTimeout(timeout);
 
             // Capture this for the setTimeout callback
             const context = this;
             const args = arguments;
 
-            //Set a new timer
+            // Set a new timer
             timeout = setTimeout(() => callBack.apply(context, args), delay);
         };
     }
 
+    /**
+     * Shows/hides a busy/loading indicator
+     * @param {boolean|number} status - Show or hide
+     * @param {number} value - Opacity value (0-100) or delay for hiding
+     */
     showBusy(status, value) {
         const thisInstance = this;
 
@@ -3551,6 +3903,12 @@ class iwebyKit {
         }
     }
 
+    /**
+     * Smooth scrolls to an element
+     * @param {string} element - CSS selector
+     * @param {number} offset - Scroll offset from top
+     * @param {Function} callBack - Callback after scroll
+     */
     scrollTo(element, offset, callBack) {
         const thisInstance = this;
         const targetElement = document.querySelector(element);
@@ -3577,11 +3935,21 @@ class iwebyKit {
         }, 100);
     }
     
+    /**
+     * Gets the current URL without query parameters
+     * @param {string} extra - Optional extra path to append
+     * @returns {string} Base URL
+     */
     getURL(extra) {
         const thisInstance = this;
         return (window.location.href.split('?')[0]).toString() + ((thisInstance.isValue(extra)) ? ('/' + extra) : '');
     }
 
+    /**
+     * Gets a URL parameter value
+     * @param {string} name - Parameter name
+     * @returns {string} Parameter value or empty string
+     */
     getURLParam(name) {
         const thisInstance = this;
 
@@ -3603,6 +3971,12 @@ class iwebyKit {
         return param;
     }
 
+    /**
+     * Generates a random integer between min and max (inclusive)
+     * @param {number} min - Minimum value
+     * @param {number} max - Maximum value
+     * @returns {number} Random integer
+     */
     randomNum(min, max) {
         const thisInstance = this;
 
@@ -3621,6 +3995,11 @@ class iwebyKit {
         return parseInt(Math.random() * (max + 1 - min) + min);
     }
 
+    /**
+     * Generates a random alphanumeric string
+     * @param {number} length - String length
+     * @returns {string} Random string
+     */
     randomString(length) {
         const thisInstance = this;
 
@@ -3637,6 +4016,11 @@ class iwebyKit {
         return result;
     }
     
+    /**
+     * Generates a random password with uppercase, lowercase, and numbers
+     * @param {number} length - Password length
+     * @returns {string} Random password
+     */
     randomPassword(length) {
         const thisInstance = this;
 
@@ -3661,6 +4045,10 @@ class iwebyKit {
         return password.split('').sort(() => Math.random() - 0.5).join('');
     }
     
+    /**
+     * Filters malicious code from input fields (XSS prevention)
+     * @param {boolean} ignore_script_iframe - Whether to ignore script/iframe filtering
+     */
     filterMaliciousCode(ignore_script_iframe = false) {
         const thisInstance = this;
         
@@ -3715,6 +4103,9 @@ class iwebyKit {
         });
     }
     
+    /**
+     * Logs copyright and license information to console
+     */
     copyright() {
         const startYear = 2023;
         const currentYear = new Date().getFullYear();
@@ -3729,41 +4120,87 @@ class iwebyKit {
     }
 }
 
+/**
+ * iMD5 - A self-contained MD5 hash implementation in JavaScript
+ * 
+ * This class implements the MD5 message-digest algorithm as defined in RFC 1321.
+ * It processes input strings and produces a 32-character hexadecimal hash.
+ * 
+ * @example
+ * const md5 = new iMD5();
+ * const hash = md5.hash("Hello World");
+ * console.log(hash); // "b10a8db164e0754105b7a99be72e3fe5"
+ */
 class iMD5 {
     constructor() {
+        // Pre-computed hex character lookup table for efficient byte-to-hex conversion
         this.hexChr = '0123456789abcdef'.split('');
     }
 
+    /**
+     * Adds two 32-bit integers with overflow wrapping
+     * @param {number} a - First 32-bit integer
+     * @param {number} b - Second 32-bit integer
+     * @returns {number} Result masked to 32 bits
+     */
     add32(a, b) {
         return (a + b) & 0xFFFFFFFF;
     }
 
+    /**
+     * Core MD5 compression function operation
+     * Combines rotation, addition, and bitwise operations
+     * @param {number} q - Primary input value
+     * @param {number} a - Buffer A
+     * @param {number} b - Buffer B
+     * @param {number} x - Data chunk
+     * @param {number} s - Left rotation shift amount
+     * @param {number} t - Addition constant (sine-based)
+     * @returns {number} Computed 32-bit value
+     */
     cmn(q, a, b, x, s, t) {
-        return this.add32((this.add32(this.add32(a, q), this.add32(x, t)) << s) | (this.add32(this.add32(a, q), this.add32(x, t)) >>> (32 - s)), b);
+        return this.add32(
+            (this.add32(this.add32(a, q), this.add32(x, t)) << s) | 
+            (this.add32(this.add32(a, q), this.add32(x, t)) >>> (32 - s)), 
+            b
+        );
     }
 
+    // --- MD5 Round Functions ---
+    // Each round uses a different nonlinear function (FF, GG, HH, II)
+    // These implement the four auxiliary functions defined in the MD5 specification
+
+    /** Round 1 function: (b & c) | (~b & d) */
     ff(a, b, c, d, x, s, t) {
         return this.cmn((b & c) | ((~b) & d), a, b, x, s, t);
     }
 
+    /** Round 2 function: (b & d) | (c & ~d) */
     gg(a, b, c, d, x, s, t) {
         return this.cmn((b & d) | (c & (~d)), a, b, x, s, t);
     }
 
+    /** Round 3 function: b ^ c ^ d (XOR) */
     hh(a, b, c, d, x, s, t) {
         return this.cmn(b ^ c ^ d, a, b, x, s, t);
     }
 
+    /** Round 4 function: c ^ (b | ~d) */
     ii(a, b, c, d, x, s, t) {
         return this.cmn(c ^ (b | (~d)), a, b, x, s, t);
     }
 
+    /**
+     * Processes a single 512-bit block (16-word chunk) through the MD5 compression
+     * This is the heart of the MD5 algorithm - performs 64 operations per block
+     * 
+     * @param {number[]} x - State array [a, b, c, d] to be updated
+     * @param {number[]} k - 16-word (512-bit) message block
+     */
     md5cycle(x, k) {
-        let a = x[0],
-            b = x[1],
-            c = x[2],
-            d = x[3];
+        let a = x[0], b = x[1], c = x[2], d = x[3];
 
+        // --- Round 1: 16 operations using FF function ---
         a = this.ff(a, b, c, d, k[0], 7, -680876936);
         d = this.ff(d, a, b, c, k[1], 12, -389564586);
         c = this.ff(c, d, a, b, k[2], 17, 606105819);
@@ -3781,6 +4218,7 @@ class iMD5 {
         c = this.ff(c, d, a, b, k[14], 17, -1502002290);
         b = this.ff(b, c, d, a, k[15], 22, 1236535329);
 
+        // --- Round 2: 16 operations using GG function ---
         a = this.gg(a, b, c, d, k[1], 5, -165796510);
         d = this.gg(d, a, b, c, k[6], 9, -1069501632);
         c = this.gg(c, d, a, b, k[11], 14, 643717713);
@@ -3798,6 +4236,7 @@ class iMD5 {
         c = this.gg(c, d, a, b, k[7], 14, 1735328473);
         b = this.gg(b, c, d, a, k[12], 20, -1926607734);
 
+        // --- Round 3: 16 operations using HH function ---
         a = this.hh(a, b, c, d, k[5], 4, -378558);
         d = this.hh(d, a, b, c, k[8], 11, -2022574463);
         c = this.hh(c, d, a, b, k[11], 16, 1839030562);
@@ -3815,6 +4254,7 @@ class iMD5 {
         c = this.hh(c, d, a, b, k[15], 16, 530742520);
         b = this.hh(b, c, d, a, k[2], 23, -995338651);
 
+        // --- Round 4: 16 operations using II function ---
         a = this.ii(a, b, c, d, k[0], 6, -198630844);
         d = this.ii(d, a, b, c, k[7], 10, 1126891415);
         c = this.ii(c, d, a, b, k[14], 15, -1416354905);
@@ -3832,57 +4272,107 @@ class iMD5 {
         c = this.ii(c, d, a, b, k[2], 15, 718787259);
         b = this.ii(b, c, d, a, k[9], 21, -343485551);
 
+        // Add the results back to the state (modulo 2^32)
         x[0] = this.add32(a, x[0]);
         x[1] = this.add32(b, x[1]);
         x[2] = this.add32(c, x[2]);
         x[3] = this.add32(d, x[3]);
     }
 
+    /**
+     * Main MD5 processing function for string input
+     * 
+     * Steps:
+     * 1. Initialize MD5 state with magic constants
+     * 2. Process message in 512-bit (64-byte) chunks
+     * 3. Pad the final chunk according to MD5 specification
+     * 4. Append message length (in bits) as 64-bit integer
+     * 5. Process the final chunk
+     * 
+     * @param {string} s - Input string to hash
+     * @returns {number[]} Array of 4 32-bit integers representing the hash state
+     */
     md51(s) {
         let n = s.length;
+        // MD5 initial state (magic constants from RFC 1321)
         let state = [1732584193, -271733879, -1732584194, 271733878];
         let i;
 
+        // Process complete 64-byte blocks
         for (i = 64; i <= s.length; i += 64) {
             this.md5cycle(state, this.md5blk(s.substring(i - 64, i)));
         }
 
+        // Get the remaining partial block (< 64 bytes)
         s = s.substring(i - 64);
 
+        // Create the 16-word (512-bit) padding block
         let tail = new Array(16).fill(0);
         for (i = 0; i < s.length; i++) {
             tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
         }
+        // Append the '1' bit (0x80) as per padding specification
         tail[i >> 2] |= 0x80 << ((i % 4) << 3);
 
+        // If the padding doesn't leave enough room for the length (64 bits),
+        // process this block and create another one
         if (i > 55) {
             this.md5cycle(state, tail);
             tail = new Array(16).fill(0);
         }
 
+        // Append the original message length in bits (as 64-bit little-endian)
+        // Note: Only lower 32 bits are used (JavaScript number limitation)
         tail[14] = n * 8;
 
+        // Process the final block
         this.md5cycle(state, tail);
 
         return state;
     }
 
+    /**
+     * Converts a 64-byte string into a 16-word array (little-endian)
+     * Each word is formed from 4 bytes
+     * 
+     * @param {string} s - 64-byte string chunk
+     * @returns {number[]} Array of 16 32-bit integers
+     */
     md5blk(s) {
         let md5blks = [];
         for (let i = 0; i < 64; i += 4) {
-            md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
+            md5blks[i >> 2] = 
+                s.charCodeAt(i) + 
+                (s.charCodeAt(i + 1) << 8) + 
+                (s.charCodeAt(i + 2) << 16) + 
+                (s.charCodeAt(i + 3) << 24);
         }
         return md5blks;
     }
 
+    /**
+     * Converts a 32-bit integer to an 8-character hex string (little-endian)
+     * Processes bytes in reverse order (LSB first)
+     * 
+     * @param {number} n - 32-bit integer
+     * @returns {string} 8-character hex representation
+     */
     rhex(n) {
         let s = '';
         for (let j = 0; j < 4; j++) {
-            s += this.hexChr[(n >> (j * 8 + 4)) & 0x0F] + this.hexChr[(n >> (j * 8)) & 0x0F];
+            // Extract each byte (from least significant to most significant)
+            s += this.hexChr[(n >> (j * 8 + 4)) & 0x0F] + 
+                 this.hexChr[(n >> (j * 8)) & 0x0F];
         }
         return s;
     }
 
+    /**
+     * Converts the final hash state array to a 32-character hex string
+     * 
+     * @param {number[]} x - Array of 4 32-bit integers
+     * @returns {string} Concatenated hex string
+     */
     hex(x) {
         for (let i = 0; i < x.length; i++) {
             x[i] = this.rhex(x[i]);
@@ -3890,22 +4380,52 @@ class iMD5 {
         return x.join('');
     }
 
+    /**
+     * Public API: Compute MD5 hash of a string
+     * 
+     * @param {string} s - Input string to hash
+     * @returns {string} 32-character hexadecimal MD5 hash
+     */
     hash(s) {
         return this.hex(this.md51(s));
     }
 }
 
+/**
+ * iDatePicker - A lightweight, customizable date picker component
+ * 
+ * This class creates an interactive date picker that can be attached to input elements.
+ * It supports multiple languages, date formats, date restrictions, and disabled dates.
+ * 
+ * @example
+ * const datePicker = new iDatePicker('en', 'YYYY-MM-DD');
+ * datePicker.render('.date-input');
+ * 
+ * // HTML attributes for configuration:
+ * // data-min="2024-01-01" - Minimum selectable date
+ * // data-max="2024-12-31" - Maximum selectable date
+ * // data-disabled-date="2024-12-25,2024-12-26" - Specific disabled dates
+ * // data-disabled-week="0,6" - Disabled weekdays (0=Sunday, 6=Saturday)
+ */
 class iDatePicker {
+    /**
+     * Creates a new date picker instance
+     * @param {string} lang - Language for day names ('en' or 'zh')
+     * @param {string} dateFormat - Date format ('YYYY-MM-DD' or 'DD/MM/YYYY')
+     */
     constructor(lang = 'en', dateFormat = 'YYYY-MM-DD') {
         this.lang = lang;
         this.dateFormat = dateFormat;
-        this.calendarElement;
-        this.currentDate = new Date();
-        this.selectedDate;
-        this.minDate;
-        this.maxDate;
-        this.activeInputElement;
+        this.calendarElement;              // DOM element of the calendar popup
+        this.currentDate = new Date();      // Currently displayed month/year
+        this.selectedDate;                 // User-selected date
+        this.minDate;                      // Minimum selectable date
+        this.maxDate;                      // Maximum selectable date
+        this.activeInputElement;           // Input element currently focused
+        this.disabledDates = [];           // Specific dates that cannot be selected
+        this.disabledWeekdays = [];        // Weekdays that cannot be selected (0=Sunday, 1=Monday, ...)
 
+        // Global click listener to close calendar when clicking outside
         document.addEventListener('click', (e) => {
             if (this.calendarElement &&
                 !e.target.closest('input.idatepicker') &&
@@ -3920,8 +4440,11 @@ class iDatePicker {
         });
     }
 
+    /**
+     * Attaches the date picker to input elements matching the selector
+     * @param {string} elements - CSS selector for input elements
+     */
     render(elements) {
-        // Add event listeners to new input elements if not already present
         const inputElements = document.querySelectorAll(elements);
         if (inputElements) {
             inputElements.forEach((inputElement) => {
@@ -3933,34 +4456,49 @@ class iDatePicker {
         }
     }
 
+    /**
+     * Handles input focus event - shows calendar for the focused input
+     * @param {HTMLInputElement} inputElement - The input element that received focus
+     */
     onFocusInput(inputElement) {
-        // Update the calendar date based on the input value if present
         let inputValue = inputElement.value;
-        // Check if the input value matches the expected date format
+        
+        // Parse the input value or use current date if invalid
         if (!(inputValue && this.isValidDateFormat(inputValue))) {
             inputValue = this.formatDate(new Date());
         }
 
-        this.currentDate = this.parseDate(inputValue); // Parse the input date
+        this.currentDate = this.parseDate(inputValue);
         this.selectedDate = new Date(this.currentDate);
         
+        // Read configuration attributes from the input element
         const minAttr = inputElement.getAttribute('data-min');
         this.minDate = minAttr ? minAttr.trim() : null;
 
         const maxAttr = inputElement.getAttribute('data-max');
         this.maxDate = maxAttr ? maxAttr.trim() : null;
+        
+        const disabledDatesAttr = inputElement.getAttribute('data-disabled-date');
+        this.disabledDates = disabledDatesAttr ? disabledDatesAttr.split(',').map(d => d.trim()) : [];
 
-        this.activeInputElement = inputElement; // Set the active input element
-        this.showCalendar(inputElement); // Display the calendar
+        const disabledWeekdaysAttr = inputElement.getAttribute('data-disabled-week');
+        this.disabledWeekdays = disabledWeekdaysAttr ? disabledWeekdaysAttr.split(',').map(d => parseInt(d.trim())) : [];
+
+        this.activeInputElement = inputElement;
+        this.showCalendar(inputElement);
     }
 
+    /**
+     * Displays the calendar popup near the input element
+     * @param {HTMLInputElement} inputElement - The input element to position the calendar near
+     */
     showCalendar(inputElement) {
         // Remove existing calendar if present
         if (this.calendarElement) {
             this.calendarElement.remove();
         }
 
-        // Create a new calendar element with basic styling
+        // Create a new calendar container with styling
         this.calendarElement = this.createElement('div', {
             position: 'absolute',
             backgroundColor: '#fff',
@@ -3980,31 +4518,39 @@ class iDatePicker {
         this.calendarElement.style.top = (rect.bottom + window.scrollY) + 'px';
         this.calendarElement.style.left = (rect.left + window.scrollX) + 'px';
 
-        this.buildCalendar(); // Build the calendar UI
+        this.buildCalendar();
     }
 
+    /**
+     * Removes the calendar popup from the DOM
+     */
     hideCalendar() {
-        // Remove the calendar from the DOM
         if (this.calendarElement) {
             this.calendarElement.remove();
-            this.calendarElement;
+            this.calendarElement = null;
         }
     }
 
+    /**
+     * Builds the complete calendar UI with header and date grid
+     */
     buildCalendar() {
         const currentYear = this.currentDate.getFullYear();
         const currentMonth = this.currentDate.getMonth();
-        this.calendarElement.innerHTML = ''; // Clear previous calendar content
+        this.calendarElement.innerHTML = '';
 
-        const headerDiv = this.createHeader(); // Create header with navigation
-        const table = this.createCalendarTable(currentYear, currentMonth); // Create calendar table
+        const headerDiv = this.createHeader();
+        const table = this.createCalendarTable(currentYear, currentMonth);
 
         this.calendarElement.appendChild(headerDiv);
         this.calendarElement.appendChild(table);
     }
 
+    /**
+     * Creates the calendar header with month/year display and navigation buttons
+     * @returns {HTMLElement} Header container element
+     */
     createHeader() {
-        // Create the header with previous and next month buttons and current month/year display
         const headerDiv = this.createElement('div', {
             display: 'flex',
             justifyContent: 'space-between',
@@ -4012,7 +4558,7 @@ class iDatePicker {
             padding: '5px 0px 10px 0px'
         });
 
-        const prevButton = this.createButton('🞀', 'idatepicker-prev-month', () => this.changeMonth(-1)); // Button to go to the previous month
+        const prevButton = this.createButton('🞀', 'idatepicker-prev-month', () => this.changeMonth(-1));
         const monthYearSpan = this.createElement('span', {
             fontSize: '15px',
             fontWeight: 'bold'
@@ -4021,7 +4567,7 @@ class iDatePicker {
             month: 'short'
         }) + ' / ' + this.currentDate.getFullYear();
 
-        const nextButton = this.createButton('🞂', 'idatepicker-next-month', () => this.changeMonth(1)); // Button to go to the next month
+        const nextButton = this.createButton('🞂', 'idatepicker-next-month', () => this.changeMonth(1));
 
         headerDiv.appendChild(prevButton);
         headerDiv.appendChild(monthYearSpan);
@@ -4030,11 +4576,17 @@ class iDatePicker {
         return headerDiv;
     }
 
+    /**
+     * Creates a styled button for month navigation
+     * @param {string} text - Button text
+     * @param {string} id - Button ID
+     * @param {Function} onClick - Click event handler
+     * @returns {HTMLButtonElement} The created button
+     */
     createButton(text, id, onClick) {
-        // Create a button with specified text, ID, and click event handler
         const button = this.createElement('button', {
             position: 'relative',
-            backgroundColor: '#2ca4e9',
+            backgroundColor: '#1da1f2',
             fontSize: '12px',
             color: '#fff',
             padding: '3px 6px',
@@ -4054,37 +4606,49 @@ class iDatePicker {
         return button;
     }
 
+    /**
+     * Changes the displayed month by a delta value
+     * @param {number} delta - Month offset (-1 for previous, 1 for next)
+     */
     changeMonth(delta) {
-        // Adjust the displayed month by the delta value (e.g., -1 for previous month, 1 for next month)
         this.currentDate.setMonth(this.currentDate.getMonth() + delta);
-        this.buildCalendar(); // Rebuild the calendar with the new month
+        this.buildCalendar();
     }
 
+    /**
+     * Creates the calendar table structure
+     * @param {number} year - Year to display
+     * @param {number} month - Month to display (0-11)
+     * @returns {HTMLTableElement} The calendar table
+     */
     createCalendarTable(year, month) {
-        // Create the main table structure for the calendar
         const table = this.createElement('table', {
             width: '100%',
             borderCollapse: 'collapse'
         });
-        const thead = this.createTableHeader(); // Create table header with day names
-        const tbody = this.createTableBody(year, month); // Create table body with date cells
+        const thead = this.createTableHeader();
+        const tbody = this.createTableBody(year, month);
 
         table.appendChild(thead);
         table.appendChild(tbody);
         return table;
     }
 
+    /**
+     * Creates the table header with day names
+     * @returns {HTMLTableSectionElement} Header section
+     */
     createTableHeader() {
-        // Create the header row with day names based on language setting
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
         const days = (this.lang === 'en') ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['日', '一', '二', '三', '四', '五', '六'];
+        
         days.forEach((day) => {
             const th = this.createElement('th', {
                 width: '36px',
                 height: '28px',
                 fontSize: '12px',
-                color: '#2ca4e9',
+                color: '#1da1f2',
                 padding: '4px',
                 border: '2px solid #e6e6e6',
                 boxSizing: 'border-box',
@@ -4097,14 +4661,19 @@ class iDatePicker {
         return thead;
     }
 
+    /**
+     * Creates the table body with date cells for the specified month
+     * @param {number} year - Year to display
+     * @param {number} month - Month to display (0-11)
+     * @returns {HTMLTableSectionElement} Body section
+     */
     createTableBody(year, month) {
-        // Create the body of the calendar with day cells
         const tbody = document.createElement('tbody');
-        const firstDayOfMonth = new Date(year, month, 1).getDay(); // Get the day of the week for the first day of the month
-        const daysInMonth = new Date(year, month + 1, 0).getDate(); // Total days in the current month
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        const prevMonthDays = new Date(year, month, 0).getDate(); // Total days in the previous month
-        let startDay = prevMonthDays - firstDayOfMonth + 1; // Start day for the leading dates from the previous month
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        let startDay = prevMonthDays - firstDayOfMonth + 1;
 
         let day = 1;
         let nextMonthDay = 1;
@@ -4140,9 +4709,18 @@ class iDatePicker {
         return tbody;
     }
 
+    /**
+     * Creates a date cell with styling and interaction
+     * @param {number} day - Day number to display
+     * @param {string} dateObj - Formatted date string
+     * @param {boolean} isOtherMonth - Whether this date belongs to another month
+     * @returns {HTMLTableCellElement} The created cell
+     */
     createDateCell(day, dateObj, isOtherMonth) {
-        // Create a table cell representing a day in the calendar
         let canSelect = true;
+        const dateObjParsed = this.parseDate(dateObj);
+        
+        // Check min/max date restrictions
         if(this.minDate !== null) {
             if(new Date(this.minDate) - new Date(dateObj) > 0) {
                 canSelect = false;
@@ -4154,29 +4732,56 @@ class iDatePicker {
             }
         }
         
+        // Check specific disabled dates (supports wildcard patterns like "2024-12-*")
+        if (this.disabledDates.length > 0) {
+            const dateStr = this.formatDate(dateObjParsed);
+            if (this.disabledDates.some(disabledDate => {
+                if (disabledDate.includes('*')) {
+                    const pattern = disabledDate.replace(/\*/g, '\\d+');
+                    const regex = new RegExp('^' + pattern + '$');
+                    return regex.test(dateStr);
+                }
+                return dateStr === disabledDate;
+            })) {
+                canSelect = false;
+            }
+        }
+
+        // Check disabled weekdays
+        if (this.disabledWeekdays.length > 0) {
+            const weekday = dateObjParsed.getDay();
+            if (this.disabledWeekdays.includes(weekday)) {
+                canSelect = false;
+            }
+        }
+        
+        // Determine cell styling based on state (selected, disabled, other month)
         const td = this.createElement('td', {
-            backgroundColor: this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#2ca4e9' : '',
+            backgroundColor: (!canSelect ? '#f6f6f6' : this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#1da1f2' : ''),
             width: '36px',
             height: '28px',
             fontSize: '12px',
-            color: (!canSelect || isOtherMonth)  ? '#aaa' : this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#fff' : '',
+            color: ((!canSelect || isOtherMonth)  ? (!canSelect ? '#f93a37' : '#aaa') : (this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#fff' : '')),
             padding: '4px',
             border: '2px solid #e6e6e6',
             boxSizing: 'border-box',
             textAlign: 'center',
             cursor: 'pointer'
         });
-        td.dataset.date = dateObj; // Store the date value in the cell
+        td.dataset.date = dateObj;
         td.textContent = day;
+        
         if(canSelect) {
-            td.addEventListener('click', () => this.onDateSelect(dateObj)); // Add event listener for date selection
+            td.addEventListener('click', () => this.onDateSelect(dateObj));
         }
         return td;
     }
     
-
+    /**
+     * Handles date selection - updates input and closes calendar
+     * @param {string} dateObj - Formatted date string
+     */
     onDateSelect(dateObj) {
-        // Parse the date from the formatted string
         const selectedDate = this.parseDate(dateObj);
         if (!isNaN(selectedDate)) {
             this.activeInputElement.value = this.formatDate(selectedDate);
@@ -4189,56 +4794,88 @@ class iDatePicker {
         }
     }
 
+    /**
+     * Utility method to create DOM elements with styles
+     * @param {string} tag - HTML tag name
+     * @param {Object} styles - CSS styles to apply
+     * @param {string} className - Optional class name
+     * @returns {HTMLElement} The created element
+     */
     createElement(tag, styles = {}, className) {
-        // Create an HTML element with optional class and styles
         const el = document.createElement(tag);
         if (className) el.className = className;
         Object.assign(el.style, styles);
         return el;
     }
 
+    /**
+     * Validates if a date string matches the configured format
+     * @param {string} dateString - Date string to validate
+     * @returns {boolean} True if valid format
+     */
     isValidDateFormat(dateString) {
-        // Define the regex pattern based on the specified date format
         let regex;
         if ((this.dateFormat.toString().toUpperCase()) === 'DD/MM/YYYY') {
-            // Match DD/MM/YYYY format, e.g., 25/12/2024
             regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
         } 
         else {
-            // Default to YYYY-MM-DD format, e.g., 2024-12-25
             regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
         }
-
-        // Return whether the input matches the regex pattern
         return regex.test(dateString);
     }
 
+    /**
+     * Parses a date string into a Date object based on the configured format
+     * @param {string} dateString - Date string to parse
+     * @returns {Date} Parsed date object
+     */
     parseDate(dateString) {
-        // Parse date based on the specified format
         const [year, month, day] = (this.dateFormat.toString().toUpperCase()) === 'DD/MM/YYYY' ?
-        dateString.split('/').map(Number).reverse(): dateString.split('-').map(Number);
-
-        // Return a new Date object based on parsed values
+            dateString.split('/').map(Number).reverse() : 
+            dateString.split('-').map(Number);
         return new Date(year, month - 1, day);
     }
 
+    /**
+     * Formats a Date object into a string based on the configured format
+     * @param {Date} date - Date object to format
+     * @returns {string} Formatted date string
+     */
     formatDate(date) {
-        // Format a date object into a string based on the specified dateFormat
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
 
-        // Return the date formatted according to the specified dateFormat
-        if ((this.dateFormat.toString().toLowerCase()) === 'DD/MM/YYYY') {
+        if ((this.dateFormat.toString().toLowerCase()) === 'dd/mm/yyyy') {
             return day + '/' + month + '/' + year;
         }
-        return year + '-' + month + '-' + day; // Default format: YYYY-MM-DD
+        return year + '-' + month + '-' + day;
     }
 }
 
+/**
+ * iTimePicker - A lightweight, customizable time picker component
+ * 
+ * This class creates an interactive time picker that can be attached to input elements.
+ * It supports time ranges, intervals, and disabled time ranges.
+ * 
+ * @example
+ * const timePicker = new iTimePicker();
+ * timePicker.render('.time-input');
+ * 
+ * // HTML attributes for configuration:
+ * // data-start="600" - Start time in HHMM format (e.g., 600 = 06:00)
+ * // data-end="2200" - End time in HHMM format (e.g., 2200 = 22:00)
+ * // data-interval="5" - Interval in minutes between time options
+ * // data-disabled-range="09:00-12:00,13:30-14:30" - Disabled time ranges
+ */
 class iTimePicker {
     constructor() {
-        this.activeInput = null;
+        this.activeInput = null;                    // Currently focused input element
+        this.disabledTimeRanges = [];               // Array of disabled time ranges {start, end} in minutes
+        this.pickerElement = null;                  // Reference to the picker DOM element
+        
+        // Global click listener to close picker when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('input.itimepicker') &&
                 !e.target.closest('div.time-picker-list')) {
@@ -4251,77 +4888,160 @@ class iTimePicker {
         });
     }
 
+    /**
+     * Attaches the time picker to input elements matching the selector
+     * @param {string} elements - CSS selector for input elements
+     */
     render(elements) {
-        // Add event listeners to new input elements if not already present
         const inputElements = document.querySelectorAll(elements);
         if (inputElements) {
             inputElements.forEach((inputElement) => {
                 if (!inputElement.classList.contains('itimepicker')) {
                     inputElement.type = 'text';
                     inputElement.classList.add('itimepicker');
+                    inputElement.placeholder = 'HH:MM';
                 }
             });
         }
     }
 
+    /**
+     * Displays the time picker popup near the input element
+     * @param {HTMLInputElement} input - The input element to position the picker near
+     */
     showTimePicker(input) {
         this.hidePicker();
 
-        this.activeInput = input; // Track the input currently being edited
-        const startTime = (parseInt(input.getAttribute('data-start') || 600)); // Use data-start or default to 600
-        const endTime = (parseInt(input.getAttribute('data-end') || 2200)); // Use data-end or default to 2200
-        const interval = parseInt(input.getAttribute('data-interval') || 5); // Use data-interval or default to 5
+        this.activeInput = input;
+        
+        // Parse configuration attributes with fallback defaults
+        const startTime = (parseInt(input.getAttribute('data-start') || 600));  // Default: 06:00
+        const endTime = (parseInt(input.getAttribute('data-end') || 2200));     // Default: 22:00
+        const interval = parseInt(input.getAttribute('data-interval') || 5);    // Default: 5 minutes
+        
+        // Parse disabled time ranges from data attribute
+        const disabledRangesAttr = input.getAttribute('data-disabled-range');
+        this.disabledTimeRanges = this.parseDisabledRanges(disabledRangesAttr);
+        
         const picker = this.createPicker(startTime, endTime, interval);
         document.body.appendChild(picker);
+        this.pickerElement = picker;
 
+        // Position the picker below the input element
         const { top, left, height } = input.getBoundingClientRect();
         picker.style.position = 'absolute';
         picker.style.top = (top + window.scrollY + height) + 'px';
         picker.style.left = (left + window.scrollX) + 'px';
-
-        picker.addEventListener('click', (e) => {
-            if (e.target.classList.contains('time-option')) {
-                this.activeInput.value = e.target.textContent;
-                this.activeInput.dispatchEvent(new Event('change', {
-                    bubbles: true
-                }));
-                this.hidePicker();
-            }
-        });
     }
 
+    /**
+     * Removes the time picker from the DOM
+     */
     hidePicker() {
+        if (this.pickerElement) {
+            this.pickerElement.remove();
+            this.pickerElement = null;
+        }
+        // Fallback: remove by selector if reference is lost
         const picker = document.querySelector('div.time-picker-list');
         if (picker) {
             picker.remove();
         }
     }
 
+    /**
+     * Creates the time picker dropdown with time options
+     * @param {number} startTime - Start time in HHMM format (e.g., 600 = 06:00)
+     * @param {number} endTime - End time in HHMM format (e.g., 2200 = 22:00)
+     * @param {number} interval - Interval in minutes between options
+     * @returns {HTMLElement} The picker container element
+     */
     createPicker(startTime, endTime, interval) {
         const picker = document.createElement('div');
         picker.classList.add('time-picker-list');
-        picker.style.border = '2px solid #e6e6e6';
-        picker.style.backgroundColor = '#fff';
-        picker.style.padding = '10px';
-        picker.style.marginTop = '2px';
-        picker.style.maxHeight = '200px';
-        picker.style.overflow = 'auto';
-        picker.style.zIndex = '100';
+        
+        // Apply styling
+        Object.assign(picker.style, {
+            border: '2px solid #e6e6e6',
+            backgroundColor: '#fff',
+            padding: '10px',
+            marginTop: '2px',
+            maxHeight: '200px',
+            overflow: 'auto',
+            zIndex: '100',
+            borderRadius: '4px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+        });
 
         const times = this.generateTimeOptions(startTime, endTime, interval);
+        
+        if (times.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.textContent = 'No time options available';
+            emptyMsg.style.padding = '10px';
+            emptyMsg.style.color = '#999';
+            emptyMsg.style.textAlign = 'center';
+            picker.appendChild(emptyMsg);
+            return picker;
+        }
+
         times.forEach(time => {
             const timeOption = document.createElement('div');
             timeOption.textContent = time;
             timeOption.classList.add('time-option');
-            timeOption.style.padding = '5px';
-            timeOption.style.cursor = 'pointer';
-            timeOption.style.borderBottom = '1px solid #f0f0f0';
+            
+            // Check if this time is within any disabled range
+            const isDisabled = this.isTimeDisabled(time);
+            
+            // Apply styling based on disabled state
+            Object.assign(timeOption.style, {
+                padding: '8px 12px',
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                borderBottom: '1px solid #f0f0f0',
+                color: isDisabled ? '#aaa' : '#333',
+                backgroundColor: isDisabled ? '#f5f5f5' : 'transparent',
+                transition: 'background-color 0.15s ease'
+            });
+
+            // Hover effect for enabled options
+            if (!isDisabled) {
+                timeOption.addEventListener('mouseenter', () => {
+                    timeOption.style.backgroundColor = '#e8f4fd';
+                });
+                timeOption.addEventListener('mouseleave', () => {
+                    timeOption.style.backgroundColor = 'transparent';
+                });
+                
+                timeOption.addEventListener('click', () => {
+                    if (this.activeInput) {
+                        this.activeInput.value = time;
+                        this.activeInput.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
+                        this.activeInput.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+                        this.hidePicker();
+                    }
+                });
+            } else {
+                // Add disabled indicator
+                timeOption.title = 'This time is disabled';
+            }
+            
             picker.appendChild(timeOption);
         });
 
         return picker;
     }
 
+    /**
+     * Generates an array of time strings within the specified range and interval
+     * @param {number} startTime - Start time in HHMM format
+     * @param {number} endTime - End time in HHMM format
+     * @param {number} interval - Interval in minutes between options
+     * @returns {string[]} Array of formatted time strings (HH:MM)
+     */
     generateTimeOptions(startTime, endTime, interval) {
         const times = [];
         const startHour = Math.floor(startTime / 100);
@@ -4329,11 +5049,17 @@ class iTimePicker {
         const endHour = Math.floor(endTime / 100);
         const endMinute = endTime % 100;
 
+        // Validate input ranges
+        if (startHour < 0 || startHour > 23 || endHour < 0 || endHour > 23) {
+            console.warn('iTimePicker: Invalid time range - hours must be between 0-23');
+            return times;
+        }
+
         let currentHour = startHour;
         let currentMinute = startMinute;
 
         while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
-            if (parseInt(currentHour) < 24) {
+            if (currentHour < 24 && currentHour >= 0) {
                 times.push(this.formatTime(currentHour, currentMinute));
             }
             currentMinute += interval;
@@ -4346,27 +5072,156 @@ class iTimePicker {
         return times;
     }
 
+    /**
+     * Formats hour and minute into a time string (HH:MM)
+     * @param {number} hour - Hour (0-23)
+     * @param {number} minute - Minute (0-59)
+     * @returns {string} Formatted time string
+     */
     formatTime(hour, minute) {
         const formattedHour = String(hour).padStart(2, '0');
         const formattedMinute = String(minute).padStart(2, '0');
-        return (formattedHour + ':' + formattedMinute);
+        return formattedHour + ':' + formattedMinute;
     }
 
+    /**
+     * Auto-formats input value as the user types (HHMM -> HH:MM)
+     * @param {HTMLInputElement} input - The input element to format
+     */
     formatInputTime(input) {
         const value = input.value.replace(/\D/g, ''); // Remove non-digit characters
-        if (value.length > 4) return; // Limit to 4 digits for HHMM
+        if (value.length > 4) return;
 
         if (value.length === 4) {
-            // Format to HH:MM
-            const hour = value.slice(0, 2);
-            const minute = value.slice(2, 4);
-            input.value = this.formatTime(parseInt(hour), parseInt(minute));
+            const hour = parseInt(value.slice(0, 2));
+            const minute = parseInt(value.slice(2, 4));
+            
+            // Validate hour and minute ranges
+            if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                input.value = this.formatTime(hour, minute);
+            }
+        }
+    }
+
+    /**
+     * Parses disabled time ranges from a string attribute
+     * Supports format: "09:00-12:00,13:30-14:30"
+     * @param {string|null} disabledRangesAttr - The attribute string to parse
+     * @returns {Array<{start: number, end: number}>} Array of ranges in minutes
+     */
+    parseDisabledRanges(disabledRangesAttr) {
+        if (!disabledRangesAttr) return [];
+        
+        const ranges = [];
+        const rangeStrings = disabledRangesAttr.split(',').map(s => s.trim());
+        
+        rangeStrings.forEach(rangeStr => {
+            const parts = rangeStr.split('-');
+            if (parts.length === 2) {
+                const start = this.timeToMinutes(parts[0].trim());
+                const end = this.timeToMinutes(parts[1].trim());
+                if (start !== null && end !== null && start < end) {
+                    ranges.push({ start, end });
+                } else {
+                    console.warn('iTimePicker: Invalid disabled range format:', rangeStr);
+                }
+            }
+        });
+        
+        return ranges;
+    }
+
+    /**
+     * Converts a time string (HH:MM) to total minutes since midnight
+     * @param {string} timeStr - Time string in HH:MM format
+     * @returns {number|null} Minutes since midnight, or null if invalid
+     */
+    timeToMinutes(timeStr) {
+        const parts = timeStr.split(':');
+        if (parts.length === 2) {
+            const hour = parseInt(parts[0]);
+            const minute = parseInt(parts[1]);
+            if (!isNaN(hour) && !isNaN(minute) && 
+                hour >= 0 && hour < 24 && 
+                minute >= 0 && minute < 60) {
+                return hour * 60 + minute;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks if a given time string is within any disabled range
+     * @param {string} timeStr - Time string in HH:MM format
+     * @returns {boolean} True if the time is disabled
+     */
+    isTimeDisabled(timeStr) {
+        if (this.disabledTimeRanges.length === 0) return false;
+        
+        const timeMinutes = this.timeToMinutes(timeStr);
+        if (timeMinutes === null) return false;
+        
+        // Check if time falls within any disabled range
+        for (const range of this.disabledTimeRanges) {
+            if (timeMinutes >= range.start && timeMinutes < range.end) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Gets the current value from the active input
+     * @returns {string} The current time value
+     */
+    getValue() {
+        return this.activeInput ? this.activeInput.value : '';
+    }
+
+    /**
+     * Sets the value of the active input
+     * @param {string} time - Time string in HH:MM format
+     */
+    setValue(time) {
+        if (this.activeInput) {
+            this.activeInput.value = time;
+            this.activeInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
     }
 }
 
+/**
+ * iPagination - A lightweight, customizable pagination component
+ * 
+ * This class creates an interactive pagination widget with multiple display modes,
+ * page jumping, and URL parameter management.
+ * 
+ * @example
+ * // Basic usage
+ * const pagination = new iPagination(document.getElementById('pagination'), {
+ *     mode: 1,        // Display mode: 1=simple arrows, 2=with first/last page numbers
+ *     size: 5,        // Number of page links to display
+ *     total: 10,      // Total number of pages
+ *     placeholder: 'Go' // Placeholder text for jump input
+ * });
+ * 
+ * // HTML data attributes override options:
+ * // data-size="5" - Number of page links to display
+ * // data-totalpage="10" - Total number of pages
+ */
 class iPagination {
+    /**
+     * Creates a new pagination instance
+     * @param {HTMLElement} el - Container element for the pagination
+     * @param {Object} options - Configuration options
+     * @param {number} options.mode - Display mode: 1=simple arrows, 2=with first/last page numbers
+     * @param {number} options.size - Number of page links to display
+     * @param {number} options.total - Total number of pages
+     * @param {string} options.placeHolder - Placeholder text for jump input
+     */
     constructor(el, options) {
+        // Merge default options with user-provided options
         this.options = Object.assign({
             mode: 1,
             size: 5,
@@ -4377,28 +5232,51 @@ class iPagination {
         this.currentPage = 1;
         this.url = new URL(window.location.href);
         this.searchParams = new URLSearchParams(this.url.search);
+        
+        // Extract current page from URL query parameter
         if (this.searchParams.has('page')) {
             this.currentPage = Math.max(parseInt(this.searchParams.get('page')), 1);
         }
+        // Remove page parameter to build clean base URL
         this.searchParams.delete('page');
         this.baseUrl = this.url.origin + this.url.pathname + '?' + this.searchParams.toString();
 
         this.renderPagination(el);
     }
 
+    /**
+     * Generates a URL with the specified page number
+     * @param {number} page - Page number to include in URL
+     * @returns {string} Complete URL with page parameter
+     */
     createPageUrl(page) {
         return (this.baseUrl + '&page=' + page).replace('?&', '?');
     }
 
+    /**
+     * Adds event listener for page jumping via input field
+     * @param {HTMLInputElement} inputElement - Input element for page jumping
+     */
     jumpToPage(inputElement) {
         inputElement.addEventListener('keypress', (e) => {
-            if (e.which === 13) {
-                let jumpToPage = Math.min(Math.max(parseInt(inputElement.value) || 1, 1), inputElement.getAttribute('data-max'));
+            if (e.which === 13) { // Enter key
+                const maxPage = parseInt(inputElement.getAttribute('data-max'));
+                let jumpToPage = Math.min(
+                    Math.max(parseInt(inputElement.value) || 1, 1),
+                    maxPage
+                );
                 window.location.href = this.createPageUrl(jumpToPage);
             }
         });
     }
 
+    /**
+     * Utility method to create DOM elements with optional class and content
+     * @param {string} tag - HTML tag name
+     * @param {string} className - CSS class name(s)
+     * @param {string} content - Inner HTML content
+     * @returns {HTMLElement} The created element
+     */
     createPaginationElement(tag, className = '', content = '') {
         const element = document.createElement(tag);
         if (className) element.className = className;
@@ -4406,11 +5284,21 @@ class iPagination {
         return element;
     }
 
+    /**
+     * Renders the pagination component in the container element
+     * @param {HTMLElement} element - Container element for pagination
+     */
     renderPagination(element) {
+        // Prevent duplicate rendering
         if (!element.querySelector('div.iweby-pagination')) {
-            let pageSize = element.getAttribute('data-size') || this.options.size;
-            let totalPage = element.getAttribute('data-totalpage') || this.options.total;
+            // Get configuration from data attributes or use options
+            let pageSize = parseInt(element.getAttribute('data-size')) || this.options.size;
+            let totalPage = parseInt(element.getAttribute('data-totalpage')) || this.options.total;
 
+            // Clamp current page within valid range
+            this.currentPage = Math.min(this.currentPage, totalPage);
+            
+            // Calculate page range to display
             let firstPage = 1;
             let prevPage = Math.max(this.currentPage - 1, firstPage);
             let nextPage = Math.min(this.currentPage + 1, totalPage);
@@ -4419,67 +5307,104 @@ class iPagination {
             let startPageNum = Math.max(this.currentPage - diffPageNum, firstPage);
             let endPageNum = Math.min(this.currentPage + diffPageNum, lastPage);
 
+            // Adjust page range to ensure we display exactly 'pageSize' links when possible
             if (endPageNum - startPageNum + 1 < pageSize) {
                 if (this.currentPage < firstPage + diffPageNum) {
                     endPageNum = Math.min(lastPage, startPageNum + pageSize - 1);
-                } 
-                else {
+                } else {
                     startPageNum = Math.max(firstPage, endPageNum - pageSize + 1);
                 }
             }
 
+            // Only render if there are multiple pages
             if (totalPage > 1) {
                 // Create pagination container
                 const paginationContainer = this.createPaginationElement('div', 'iweby-pagination');
                 const paginationList = this.createPaginationElement('ul');
 
-                // First Page
-                let firstPageLink = this.createPaginationElement('a', 'first', this.options.mode === 2 && this.currentPage > diffPageNum ? '<span>' + firstPage + '..</span>' : '<i></i><i></i>');
+                // --- First Page Link ---
+                // Mode 2: Shows first page number with ellipsis if not near start
+                // Mode 1: Shows double arrow icon
+                const firstPageContent = this.options.mode === 2 && this.currentPage > diffPageNum 
+                    ? '<span>' + firstPage + '..</span>' 
+                    : '<i></i><i></i>';
+                let firstPageLink = this.createPaginationElement('a', 'first', firstPageContent);
                 firstPageLink.href = this.createPageUrl(firstPage);
                 firstPageLink.title = 'First Page';
+                // Disable if already on first page
+                if (this.currentPage === firstPage) {
+                    firstPageLink.classList.add('disabled');
+                    firstPageLink.href = 'javascript:void(0);';
+                }
                 let firstLi = this.createPaginationElement('li');
                 firstLi.appendChild(firstPageLink);
                 paginationList.appendChild(firstLi);
 
-                // Previous Page
+                // --- Previous Page Link ---
                 let prevPageLink = this.createPaginationElement('a', 'prev', '<i></i>');
                 prevPageLink.href = this.createPageUrl(prevPage);
                 prevPageLink.title = 'Previous Page';
+                if (this.currentPage === firstPage) {
+                    prevPageLink.classList.add('disabled');
+                    prevPageLink.href = 'javascript:void(0);';
+                }
                 let prevLi = this.createPaginationElement('li');
                 prevLi.appendChild(prevPageLink);
                 paginationList.appendChild(prevLi);
 
-                // Page Numbers
+                // --- Page Number Links ---
                 for (let i = startPageNum; i <= endPageNum; i++) {
-                    let pageLink = this.createPaginationElement('a', 'num' + (i === this.currentPage ? ' current' : ''), '<span>' + i + '</span>');
+                    const isCurrent = i === this.currentPage;
+                    let pageLink = this.createPaginationElement(
+                        'a', 
+                        'num' + (isCurrent ? ' current' : ''), 
+                        '<span>' + i + '</span>'
+                    );
                     pageLink.href = this.createPageUrl(i);
+                    if (isCurrent) {
+                        pageLink.href = 'javascript:void(0);';
+                    }
                     let pageLi = this.createPaginationElement('li');
                     pageLi.appendChild(pageLink);
                     paginationList.appendChild(pageLi);
                 }
 
-                // Next Page
+                // --- Next Page Link ---
                 let nextPageLink = this.createPaginationElement('a', 'next', '<i></i>');
                 nextPageLink.href = this.createPageUrl(nextPage);
                 nextPageLink.title = 'Next Page';
+                if (this.currentPage === lastPage) {
+                    nextPageLink.classList.add('disabled');
+                    nextPageLink.href = 'javascript:void(0);';
+                }
                 let nextLi = this.createPaginationElement('li');
                 nextLi.appendChild(nextPageLink);
                 paginationList.appendChild(nextLi);
 
-                // Last Page
-                let lastPageLink = this.createPaginationElement('a', 'last', this.options.mode === 2 && this.currentPage < totalPage - diffPageNum ? '<span>..' + lastPage + '</span>' : '<i></i><i></i>');
+                // --- Last Page Link ---
+                // Mode 2: Shows ellipsis with last page number if not near end
+                // Mode 1: Shows double arrow icon
+                const lastPageContent = this.options.mode === 2 && this.currentPage < totalPage - diffPageNum 
+                    ? '<span>..' + lastPage + '</span>' 
+                    : '<i></i><i></i>';
+                let lastPageLink = this.createPaginationElement('a', 'last', lastPageContent);
                 lastPageLink.href = this.createPageUrl(lastPage);
                 lastPageLink.title = 'Last Page';
+                if (this.currentPage === lastPage) {
+                    lastPageLink.classList.add('disabled');
+                    lastPageLink.href = 'javascript:void(0);';
+                }
                 let lastLi = this.createPaginationElement('li');
                 lastLi.appendChild(lastPageLink);
                 paginationList.appendChild(lastLi);
 
-                // Jump to Page Input
+                // --- Jump to Page Input ---
                 let inputLi = this.createPaginationElement('li');
                 let jumpInput = this.createPaginationElement('input', 'jumpto_page');
                 jumpInput.type = 'text';
-                jumpInput.placeholder = this.options.placeholder;
+                jumpInput.placeholder = this.options.placeHolder;
                 jumpInput.setAttribute('data-max', totalPage);
+                jumpInput.setAttribute('aria-label', 'Jump to page');
                 this.jumpToPage(jumpInput);
                 inputLi.appendChild(jumpInput);
                 paginationList.appendChild(inputLi);
@@ -4490,9 +5415,106 @@ class iPagination {
             }
         }
     }
+
+    /**
+     * Updates the pagination with new total pages without re-rendering from scratch
+     * @param {number} newTotal - New total number of pages
+     * @param {HTMLElement} element - Container element containing pagination
+     */
+    updateTotal(newTotal, element) {
+        this.options.total = newTotal;
+        // Remove existing pagination and re-render
+        const existing = element.querySelector('.iweby-pagination');
+        if (existing) {
+            existing.remove();
+        }
+        this.renderPagination(element);
+    }
+
+    /**
+     * Gets the current page number
+     * @returns {number} Current page number
+     */
+    getCurrentPage() {
+        return this.currentPage;
+    }
+
+    /**
+     * Navigates to a specific page programmatically
+     * @param {number} page - Page number to navigate to
+     */
+    goToPage(page) {
+        const totalPage = this.options.total;
+        const targetPage = Math.min(Math.max(page, 1), totalPage);
+        if (targetPage !== this.currentPage) {
+            window.location.href = this.createPageUrl(targetPage);
+        }
+    }
 }
 
+/**
+ * iModalDialog - A lightweight, draggable, resizable modal dialog component
+ * 
+ * This class creates customizable modal dialogs with drag, resize, and maximize functionality.
+ * It includes Font Awesome icons for action buttons and supports stacking order (z-index).
+ * 
+ * @example
+ * // Basic usage
+ * const modal = new iModalDialog('Hello World!', {
+ *     title: 'My Modal',
+ *     width: 400,
+ *     height: 300,
+ *     className: 'custom-modal',
+ *     init: function() {
+ *         console.log('Modal initialized');
+ *     }
+ * });
+ * 
+ * // Close programmatically
+ * modal.close();
+ * 
+ * // With HTML content
+ * const modal2 = new iModalDialog('<p>This is <strong>HTML</strong> content</p>', {
+ *     title: 'HTML Content',
+ *     width: 500,
+ *     height: 400
+ * });
+ * 
+ * // CSS requirements (in your stylesheet):
+ * // .imodal-dialog { position: fixed; background: #fff; border-radius: 8px; 
+ * //                  box-shadow: 0 10px 40px rgba(0,0,0,0.3); display: flex; 
+ * //                  flex-direction: column; min-width: 200px; min-height: 150px; }
+ * // .imodal-dialog .top { display: flex; justify-content: space-between; 
+ * //                       align-items: center; padding: 12px 16px; 
+ * //                       background: #f8f9fa; border-radius: 8px 8px 0 0; 
+ * //                       cursor: move; user-select: none; }
+ * // .imodal-dialog .content { flex: 1; padding: 16px; overflow: auto; }
+ * // .imodal-dialog .resize-handle { width: 12px; height: 12px; 
+ * //                                 position: absolute; bottom: 0; right: 0; 
+ * //                                 cursor: nw-resize; }
+ * // .imodal-dialog .resize-handle::after { content: ''; position: absolute; 
+ * //                                        bottom: 3px; right: 3px; 
+ * //                                        border-right: 6px solid #aaa; 
+ * //                                        border-bottom: 6px solid #aaa; 
+ * //                                        width: 10px; height: 10px; }
+ * // .imodal-dialog .actions button { background: none; border: none; 
+ * //                                  cursor: pointer; padding: 4px 8px; 
+ * //                                  color: #666; font-size: 14px; }
+ * // .imodal-dialog .actions button:hover { color: #333; }
+ * // .imodal-dialog .actions .close:hover { color: #dc3545; }
+ * // .imodal-dialog.current { z-index: 999; }
+ */
 class iModalDialog {
+    /**
+     * Creates a new modal dialog instance
+     * @param {string} content - HTML content for the modal body
+     * @param {Object} options - Configuration options
+     * @param {string} options.title - Modal title (default: '')
+     * @param {number} options.width - Modal width in pixels (default: 0 = auto)
+     * @param {number} options.height - Modal height in pixels (default: 0 = auto)
+     * @param {string} options.className - Additional CSS class for the modal (default: null)
+     * @param {Function} options.init - Callback function executed after modal creation (default: null)
+     */
     constructor(content = '', options) {
         this.options = Object.assign({
             title: '',
@@ -4502,41 +5524,57 @@ class iModalDialog {
             init: null
         }, options);
         
+        // State tracking
+        this.isMaximized = false;
+        this.normalState = { width: '', height: '', left: '', top: '' };
+        
         this.createModal(content);
         this.makeDraggable();
         this.makeResizable();
         this.makeMaximizable();
     }
 
+    /**
+     * Creates and renders the modal DOM structure
+     * @param {string} content - HTML content for the modal body
+     */
     createModal(content) {
+        // --- Create main modal container ---
         this.modal = document.createElement('div');
         this.modal.classList.add('imodal-dialog');
-        if(this.options.className !== null) {
+        if (this.options.className !== null) {
             this.modal.classList.add(this.options.className);
         }
-        if(this.options.width > 0 && this.options.height > 0) {
+        if (this.options.width > 0 && this.options.height > 0) {
             this.modal.style.width = this.options.width + 'px';
             this.modal.style.height = this.options.height + 'px';
         }
         
+        // --- Create title bar ---
         const topBar = document.createElement('div');
         topBar.classList.add('top');
 
+        // Title text
         const titleSpan = document.createElement('span');
         titleSpan.classList.add('title');
         titleSpan.textContent = this.options.title;
 
+        // Actions container (buttons)
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('actions');
         
+        // Maximize/Fullscreen button
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.classList.add('fullscreen');
+        fullscreenBtn.setAttribute('aria-label', 'Toggle fullscreen');
         const fullscreenIcon = document.createElement('i');
         fullscreenIcon.classList.add('fa', 'fa-clone');
         fullscreenBtn.appendChild(fullscreenIcon);
 
+        // Close button
         const closeBtn = document.createElement('button');
         closeBtn.classList.add('close');
+        closeBtn.setAttribute('aria-label', 'Close dialog');
         const closeIcon = document.createElement('i');
         closeIcon.classList.add('fa', 'fa-times');
         closeBtn.appendChild(closeIcon);
@@ -4547,35 +5585,47 @@ class iModalDialog {
         topBar.appendChild(titleSpan);
         topBar.appendChild(actionsDiv);
 
+        // --- Create content body ---
         const contentDiv = document.createElement('div');
         contentDiv.classList.add('content');
         contentDiv.innerHTML = content;
 
+        // --- Create resize handle ---
         const resizeHandle = document.createElement('div');
         resizeHandle.classList.add('resize-handle');
 
+        // --- Assemble modal ---
         this.modal.appendChild(topBar);
         this.modal.appendChild(contentDiv);
         this.modal.appendChild(resizeHandle);
         
         document.body.appendChild(this.modal);
         
+        // Position modal with random offset from center for visual variety
         this.modal.style.left = ((document.documentElement.clientWidth - this.modal.offsetWidth) / 2) + (Math.random() * 100 - 50) + 'px';
         this.modal.style.top = ((document.documentElement.clientHeight - this.modal.offsetHeight) / 2) + (Math.random() * 100 - 50) + 'px';
 
+        // --- Attach event listeners ---
         this.modal.querySelector('button.close').addEventListener('click', () => this.close());
         this.modal.querySelector('button.fullscreen').addEventListener('click', () => this.toggleMaximize());
 
+        // Bring to front on click
         this.bringToFront();
         this.modal.addEventListener('mousedown', () => this.bringToFront());
         
-        if ((typeof this.options.init) === 'function') {
+        // Execute init callback if provided
+        if (typeof this.options.init === 'function') {
             this.options.init();
         }
     }
     
+    /**
+     * Brings the modal to the front by setting the highest z-index
+     * Also updates the 'current' class to indicate active modal
+     */
     bringToFront() {
         let maxZ = 200;
+        // Find the highest z-index among existing modals
         document.querySelectorAll('div.imodal-dialog').forEach((modal) => {
             modal.classList.remove('current');
             const zIndex = parseInt(window.getComputedStyle(modal).zIndex, 10);
@@ -4583,10 +5633,15 @@ class iModalDialog {
                 maxZ = Math.max(maxZ, zIndex);
             }
         });
+        // Set this modal on top
         this.modal.classList.add('current');
         this.modal.style.zIndex = maxZ + 1;
     }
     
+    /**
+     * Makes the modal draggable by dragging the title bar
+     * Uses requestAnimationFrame for smooth rendering
+     */
     makeDraggable() {
         let offsetX, offsetY, isDragging = false;
 
@@ -4599,6 +5654,7 @@ class iModalDialog {
 
         const onMouseMove = (e) => {
             if (!isDragging) return;
+            // Calculate new position with boundaries
             let x = e.clientX - offsetX;
             let y = e.clientY - offsetY;
             x = Math.max(0, Math.min(x, document.documentElement.clientWidth - this.modal.offsetWidth));
@@ -4606,7 +5662,7 @@ class iModalDialog {
 
             requestAnimationFrame(() => {
                 this.modal.style.left = x + 'px';
-                this.modal.style.top =  y + 'px';
+                this.modal.style.top = y + 'px';
             });
         };
 
@@ -4614,6 +5670,10 @@ class iModalDialog {
         document.addEventListener('mouseup', () => isDragging = false);
     }
 
+    /**
+     * Makes the modal resizable using the resize handle in the bottom-right corner
+     * Maintains minimum dimensions of 200x150 pixels
+     */
     makeResizable() {
         let isResizing = false, startX, startY, startWidth, startHeight;
         const handle = this.modal.querySelector('div.resize-handle');
@@ -4625,10 +5685,12 @@ class iModalDialog {
             startWidth = this.modal.offsetWidth;
             startHeight = this.modal.offsetHeight;
             this.bringToFront();
+            e.preventDefault(); // Prevent text selection during resize
         });
 
         const onMouseMove = (e) => {
             if (!isResizing) return;
+            // Calculate new dimensions with constraints
             let newWidth = startWidth + (e.clientX - startX);
             let newHeight = startHeight + (e.clientY - startY);
             newWidth = Math.max(200, Math.min(newWidth, document.documentElement.clientWidth - this.modal.offsetLeft));
@@ -4644,34 +5706,71 @@ class iModalDialog {
         document.addEventListener('mouseup', () => isResizing = false);
     }
 
+    /**
+     * Adds maximize/restore functionality to the fullscreen button
+     * Stores the normal state before maximizing for restoration
+     */
     makeMaximizable() {
         this.isMaximized = false;
         this.normalState = { width: '', height: '', left: '', top: '' };
 
         this.toggleMaximize = () => {
             if (this.isMaximized) {
+                // Restore to previous size and position
                 this.modal.style.width = this.normalState.width;
                 this.modal.style.height = this.normalState.height;
                 this.modal.style.left = this.normalState.left;
                 this.modal.style.top = this.normalState.top;
-            } 
-            else {
+                // Update button icon
+                const icon = this.modal.querySelector('button.fullscreen i');
+                icon.className = 'fa fa-clone';
+            } else {
+                // Store current state before maximizing
                 this.normalState = {
                     width: this.modal.style.width,
                     height: this.modal.style.height,
                     left: this.modal.style.left,
                     top: this.modal.style.top
                 };
+                // Maximize to viewport size
                 this.modal.style.width = document.documentElement.clientWidth + 'px';
                 this.modal.style.height = document.documentElement.clientHeight + 'px';
                 this.modal.style.left = '0px';
                 this.modal.style.top = '0px';
+                // Update button icon
+                const icon = this.modal.querySelector('button.fullscreen i');
+                icon.className = 'fa fa-window-restore';
             }
             this.isMaximized = !this.isMaximized;
         };
     }
 
+    /**
+     * Closes and removes the modal from the DOM
+     */
     close() {
         this.modal.remove();
+    }
+
+    /**
+     * Updates the content of the modal
+     * @param {string} newContent - New HTML content for the modal body
+     */
+    setContent(newContent) {
+        const contentDiv = this.modal.querySelector('.content');
+        if (contentDiv) {
+            contentDiv.innerHTML = newContent;
+        }
+    }
+
+    /**
+     * Updates the title of the modal
+     * @param {string} newTitle - New title text
+     */
+    setTitle(newTitle) {
+        const titleSpan = this.modal.querySelector('.title');
+        if (titleSpan) {
+            titleSpan.textContent = newTitle;
+        }
     }
 }

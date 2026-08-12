@@ -234,6 +234,10 @@ video {
     vertical-align: middle;
 }
 
+small.required-red-dot {
+    color: var(--icolor-red);
+}
+
 input[type="file"] {
     font-family: 'NotoSansTC', 'NotoSansSC', 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', 'Heiti TC', 'Arial', sans-serif;
     font-size: 0.9375rem;

@@ -15,9 +15,20 @@
 
 <input type="password" name="password" data-validation="required|password" value="Abc123">
 
-<input type="date" name="start_date" data-validation="required|date" value="2024-10-10" data-min="2024-01-01" data-max="2024-12-31">
+<input type="date" name="start_date" 
+        data-validation="required|date"
+        data-min="2026-01-01" 
+        data-max="2026-12-31"
+        data-disabled-date="2026-12-25,2026-01-01,2026-12-31"
+        data-disabled-week="0,6">
 
-<input type="time" name="start_time" data-validation="required|time" value="10:00" data-start="800" data-end="2200" data-interval="10">
+<input type="time" name="start_time" 
+        data-validation="required|time" 
+        value="10:00" 
+        data-start="800" 
+        data-end="2200" 
+        data-interval="10" 
+        data-disabled-range="13:00-14:00">
 
 <input type="color" name="mycolor" data-validation="required" value="#000000">
 
