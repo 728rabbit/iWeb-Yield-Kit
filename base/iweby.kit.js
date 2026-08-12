@@ -4718,6 +4718,7 @@ class iDatePicker {
      */
     createDateCell(day, dateObj, isOtherMonth) {
         let canSelect = true;
+        let isHoliday = false;
         const dateObjParsed = this.parseDate(dateObj);
         
         // Check min/max date restrictions
@@ -4744,6 +4745,7 @@ class iDatePicker {
                 return dateStr === disabledDate;
             })) {
                 canSelect = false;
+                isHoliday = true;
             }
         }
 
@@ -4752,16 +4754,17 @@ class iDatePicker {
             const weekday = dateObjParsed.getDay();
             if (this.disabledWeekdays.includes(weekday)) {
                 canSelect = false;
+                isHoliday = true;
             }
         }
         
         // Determine cell styling based on state (selected, disabled, other month)
         const td = this.createElement('td', {
-            backgroundColor: (!canSelect ? '#f6f6f6' : this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#1da1f2' : ''),
+            backgroundColor: (isHoliday ? '#f6f6f6' : this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#1da1f2' : ''),
             width: '36px',
             height: '28px',
             fontSize: '12px',
-            color: ((!canSelect || isOtherMonth)  ? (!canSelect ? '#f93a37' : '#aaa') : (this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#fff' : '')),
+            color: ((!canSelect || isOtherMonth)  ? (isHoliday ? '#f93a37' : '#aaa') : (this.selectedDate && dateObj === this.formatDate(this.selectedDate) ? '#fff' : '')),
             padding: '4px',
             border: '2px solid #e6e6e6',
             boxSizing: 'border-box',
