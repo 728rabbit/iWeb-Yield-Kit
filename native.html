@@ -118,8 +118,8 @@
                     <form data-ajax="1" data-alert="1">
                         <div class="widget">
                             <div class="iweby-row">
-                                <label>專業/专业 Professional</label>
-                                <select name="professionals[]" data-validation="required" data-virtual="1" data-filter="1" multiple>
+                                <label for="professionals">專業/专业 Professional</label>
+                                <select id="professionals" name="professionals[]" data-validation="required" data-virtual="1" data-filter="1" multiple>
                                      <optgroup label="技術類 Technology">
                                         <option value="software_developer" selected>軟體開發人員 Software Developers</option>
                                         <option value="engineer">工程師 engineer</option>
@@ -140,8 +140,8 @@
                             </div>
 
                             <div class="iweby-row">
-                                <label>姓名 Name</label>
-                                <input type="text" name="name" data-validation="required" value="陳大文 Chen Tai Man">
+                                <label for="name">姓名 Name</label>
+                                <input type="text" id="name" name="name" data-validation="required" value="陳大文 Chen Tai Man">
                             </div>
 
                             <div class="iweby-row">
@@ -156,7 +156,7 @@
                             </div>
 
                             <div class="iweby-row">
-                                <label>電話 Telephone</label>
+                                <label for="telephone">電話 Telephone</label>
                                 <table style="width:100%">
                                     <tr>
                                         <td width="110">
@@ -168,54 +168,54 @@
                                         </td>
                                         <td width="10">&nbsp;</td>
                                         <td>
-                                            <input type="tel" name="telephone" value="12345678" data-validation="required|number">
+                                            <input type="tel" id="telephone" name="telephone" value="12345678" data-validation="required|number">
                                         </td>
                                     </tr>
                                 </table>
                             </div>
 
                             <div class="iweby-row">
-                                <label>電郵 Email</label>
+                                <label for="email">電郵 Email</label>
                                 <input type="text" name="email" value="demo@123.com" data-validation="required|email">
                             </div>
 
                             <div class="iweby-row">
-                                <label>密碼 Password</label>
+                                <label for="password">密碼 Password</label>
                                 <input type="password" name="password" value="Abc123" data-validation="required|password">
                             </div>
 
                             <div class="iweby-row">
-                                <label>開始日期 Start Date</label>
-                                <input type="date" name="start_date" value="2024-10-10" data-validation="required|date">
+                                <label for="start_date">開始日期 Start Date</label>
+                                <input type="date" name="start_date" value="2026-10-10" data-disabled-date="2026-10-01" data-disabled-week="0" data-validation="required|date">
                             </div>
 
                             <div class="iweby-row">
-                                <label>結束日期 End Date</label>
-                                <input type="date" name="end_date" value="2024-10-10" data-min="2025-03-02" data-validation="required|date" >
+                                <label for="end_date">結束日期 End Date</label>
+                                <input type="date" name="end_date" value="2026-10-10" data-min="2025-03-02" data-validation="required|date" >
                             </div>
 
                             <div class="iweby-row">
-                                <label>開始時間 Start Time</label>
-                                <input type="time" name="start_time"  value="08:00" data-start="800" data-end="2200" data-interval="10" data-validation="required|time">
+                                <label for="start_time">開始時間 Start Time</label>
+                                <input type="time" name="start_time"  value="08:00" data-start="800" data-end="2200" data-interval="10" data-disabled-range="13:00-14:00" data-validation="required|time">
                             </div>
 
                             <div class="iweby-row">
-                                <label>結束時間 End Time</label>
+                                <label for="end_time">結束時間 End Time</label>
                                 <input type="time" name="end_time" value="08:00" data-validation="required|time">
                             </div>
 
                             <div class="iweby-row">
-                                <label>貨幣 Currency</label>
+                                <label for="currency">貨幣 Currency</label>
                                 <input type="text" name="currency" value="100" data-validation="required|ge0">
                             </div>
 
                             <div class="iweby-row">
-                                <label>顔色選擇器 Color Picker</label>
+                                <label for="mycolor">顔色選擇器 Color Picker</label>
                                 <input type="color" name="mycolor" value="#000000" data-validation="required">
                             </div>
 
                             <div class="iweby-row">
-                                <label>推薦人 Recommender</label>
+                                <label for="member_id">推薦人 Recommender</label>
                                 <input type="text" class="fill-id" name="member_id" value="1" 
                                     data-validation="required"
                                     data-cannew="1"
@@ -228,15 +228,15 @@
                             </div>
 
                             <div class="iweby-row">
-                                <label>單一附件 Single Attachment</label>
+                                <label for="myfile">單一附件 Single Attachment</label>
                                 <input type="file" name="myfile">
                                 <div>&nbsp;</div>
-                                <label>多個附件 Multiple Attachments</label>
-                                <input type="file" name="mymultifile[]" multiple>
+                                <label for="mymultifile">多個附件 Multiple Attachments</label>
+                                <input type="file" id="mymultifile" name="mymultifile[]" multiple>
                             </div>
 
                             <div class="iweby-row">
-                                <label>備注 Remark</label>
+                                <label for="content">備注 Remark</label>
                                 <textarea name="content" data-validation="required">測試 Testing</textarea>
                             </div>
 
@@ -510,9 +510,11 @@
                         dataType: 'text'
                     });
                 });
+                
+                
+                iweby.setLabelDot();
             }
             
             </script>
-        </div>
     </body>
 </html>
