@@ -650,7 +650,7 @@ div.iweby-input-file div.preview > div {
     display: inline-block;
     padding: 4px 28px 4px 12px;
     border: 2px solid var(--icolor-gray);
-    border-radius: 2px;
+    border-radius: 36px;
     vertical-align: top;
     overflow: hidden;
 }
@@ -658,7 +658,13 @@ div.iweby-input-file div.preview > div {
 div.iweby-input-file div.preview > div > span {
     display: block;
     line-height: 1.5;
+    color: var(--icolor-blue);
     vertical-align: middle;
+    cursor: pointer;
+}
+
+div.iweby-input-file div.preview > div > span:hover {
+    text-decoration: underline;
 }
 
 div.iweby-input-file div.preview > div > a {

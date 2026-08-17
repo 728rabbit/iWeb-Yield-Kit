@@ -719,7 +719,12 @@ class iwebyKit {
                         const blockdiv = document.createElement('div');
                         const span = document.createElement('span');
                         span.innerHTML = file.name;
-        
+                        span.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const blobURL = URL.createObjectURL(file);
+                            window.open(blobURL, '_blank');
+                        });
+
                         const deleteBtn = document.createElement('a');
                         deleteBtn.setAttribute('data-index', i);
                         deleteBtn.innerHTML = '<i class="fa fa-times" aria-hidden="true"></i>';
