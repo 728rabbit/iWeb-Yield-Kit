@@ -1379,7 +1379,7 @@ class iwebyKit {
                 }
                 else {
                     if (label && label.innerHTML.includes('*')) {
-                        const starRegex = /\s*<small class="required-reddot">\*<\/small>/;
+                        const starRegex = /\s*<small class="required-red-dot">\*<\/small>/;
                         label.innerHTML = label.innerHTML.replace(starRegex, '').trim();
                     }
                 }
